@@ -1,2 +1,0 @@
-# notepadd
-SPODWEB2
