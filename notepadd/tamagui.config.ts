@@ -1,9 +1,6 @@
-import { defaultConfig } from '@tamagui/config/v4'
-import { createTamagui, createFont } from '@tamagui/core'
+import { defaultConfig } from '@tamagui/config/v4';
+import { createTamagui, createFont } from '@tamagui/core';
 
-// -------------------------
-// Fonte SF-Pro
-// -------------------------
 const sfProFont = createFont({
   family: 'SF-Pro',
   size: {
@@ -45,36 +42,35 @@ const sfProFont = createFont({
     600: { normal: 'SF-Pro' },
     700: { normal: 'SF-Pro' },
   },
-})
+});
 
-// -------------------------
-// Cores personalizadas
-// -------------------------
-const lightColors = {
-  background: '#f5f5f7',
+const myLightColors = {
+  background: '#f5f5f7',         // Fundo da tela
+  color: '#1a1a1a',             // Cor do texto
+  backgroundStrong: '#ffffff',  // Fundo dos cards/elementos
+  borderColor: '#e0e0e0',       // Borda
+  
+  // CORES DE CONTRASTE
   card: '#ffffff',
-  text: '#1a1a1a',
   header: '#f5f5f7',
-
-  contrast: '#7C3AED',      // roxo
-  contrastText: '#FFE66D',  // amarelo
-}
-
-const darkColors = {
-  background: '#0d0d0f',
-  card: '#1b1b1d',
-  text: '#ffffff',
-  header: '#0d0d0f',
-
   contrast: '#7C3AED',
   contrastText: '#FFE66D',
-}
+} as const; 
 
-// -------------------------
-// Configuração final
-// -------------------------
+const myDarkColors = {
+  background: '#0d0d0f',
+  color: '#ffffff', 
+  backgroundStrong: '#1b1b1d', 
+  borderColor: '#333333',
+  
+  card: '#1b1b1d',
+  header: '#ffffffff',
+  contrast: '#7C3AED',
+  contrastText: '#FFE66D',
+} as const;
+
 export const tamaguiConfig = createTamagui({
-  ...defaultConfig,    // mantém fontes, tipos, tokens padrão do Tamagui
+  ...defaultConfig,
 
   fonts: {
     heading: sfProFont,
@@ -82,20 +78,27 @@ export const tamaguiConfig = createTamagui({
   }, 
 
   themes: {
-    light: lightColors,
-    dark: darkColors,
+    
+    light: {
+        ...defaultConfig.themes.light, 
+        ...myLightColors,             
+    },
+    dark: {
+        ...defaultConfig.themes.dark,  
+        ...myDarkColors,              
+    },
   },
 
-  // se quiser adicionar tokens adicionais, você coloca aqui
   tokens: {
     ...defaultConfig.tokens,
   },
-})
+});
 
-// Necessário para tipagem
-type Conf = typeof tamaguiConfig
+type Conf = typeof tamaguiConfig;
+
 declare module 'tamagui' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface TamaguiCustomConfig extends Conf {}
 }
 
-export default tamaguiConfig
+export default tamaguiConfig;

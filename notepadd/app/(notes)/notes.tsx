@@ -1,329 +1,354 @@
-import React, { useMemo, useContext } from "react";
-import {
-  SectionList,
-  TouchableOpacity,
-  View as RNView,
-  useWindowDimensions,
-} from "react-native";
-import { StyledText, Text, H1 } from '@/components/StyledText'; // importa o StyledText, usa no lugar de RNText
-import { View, useTheme } from "@tamagui/core";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import React, { useState, useEffect } from 'react';
+import {TextInput, TouchableOpacity,ScrollView, KeyboardAvoidingView, Platform, Alert, FlatList } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Markdown from 'react-native-markdown-display';
+import tamaguiConfig from '../../tamagui.config'; 
+import { styles, markdownStyles } from './styles';
+import { TamaguiProvider, Text, View, useTheme,} from 'tamagui'; 
 
-import { AppThemeContext } from "../_layout";
-
-//testeeee
-// número de colunas conforme largura da tela
-
-function getColumnsForWidth(width: number) {
-  if (width >= 1200) return 5;
-  if (width >= 900) return 4;
-  if (width >= 600) return 3;
-  return 2;
+interface Note {
+  id: string;
+  title: string;
+  tag: string;
+  content: string;
+  date: string;
 }
+// Chave aleatoria de armazenamento que eu escolhi
+const STORAGE_KEY = '@notepadd_notas';
 
-function NoteCard({
-  note,
-  size,
-  fontScale = 1,
-  onPress,
-  theme,
-}: {
-  note: any;
-  size: number;
-  fontScale?: number;
-  onPress: (n: any) => void;
-  theme: any;
-}) {
-  const titleFont = Math.max(12, Math.round(14 * fontScale));
-  const dateFont = Math.max(10, Math.round(12 * fontScale));
+type NotesAppContentProps = {
+  themeName: 'light' | 'dark';
+  setThemeName: (t: 'light' | 'dark') => void;
+};
 
-  return (
-    <TouchableOpacity
-      onPress={() => onPress(note)}
-      activeOpacity={0.8}
-      style={{
-        width: "100%",
-        alignItems: "center",
-      }}
-    >
-      <RNView
-        style={{
-          width: size,
-          height: size,
-          borderRadius: Math.max(8, Math.round(size * 0.08)),
-          backgroundColor: theme.card.val,
-          marginBottom: 8,
-          justifyContent: "center",
-          alignItems: "center",
-          overflow: "hidden",
-        }}
-      >
-        <StyledText
-          numberOfLines={2}
-          style={{
-            fontSize: Math.max(10, Math.round(size * 0.12)),
-            textAlign: "center",
-            paddingHorizontal: 6,
-            color: theme.text.val,
-          }}
-        >
-          {note.preview ?? note.title?.slice(0, 40)}
-        </StyledText>
-      </RNView>
+const NotesAppContent = ({ themeName, setThemeName }: NotesAppContentProps) => {
 
-      <Text
-        numberOfLines={1}
-        style={{
-          fontWeight: "700",
-          textAlign: "center",
-          fontSize: titleFont,
-          color: theme.text.val,
-        }}
-      >
-        {note.title}
-      </Text>
+  const theme = useTheme(); 
 
-      <Text
-        numberOfLines={1}
-        style={{
-          fontSize: dateFont,
-          opacity: 0.6,
-          textAlign: "center",
-          color: theme.text.val,
-        }}
-      >
-        {note.date}
-      </Text>
-    </TouchableOpacity>
-  );
-}
+  const [view, setView] = useState<'list' | 'editor'>('list');
+  const [notes, setNotes] = useState<Note[]>([]);
+  
+  const [searchText, setSearchText] = useState('');
+  const [filterTag, setFilterTag] = useState<string>('Todos');
 
+  const [currentId, setCurrentId] = useState<string | null>(null);
+  const [title, setTitle] = useState('');
+  const [tag, setTag] = useState('');
+  const [content, setContent] = useState('');
+  const [isEditingMode, setIsEditingMode] = useState(false);
+  const [selection, setSelection] = useState({ start: 0, end: 0 });
 
-//notas por data e cria linhas responsivas
+  useEffect(() => { loadNotes(); }, []);
 
-function buildSections(notes: any[], columns: number) {
-  const groups = notes.reduce((acc: Record<string, any[]>, note) => {
-    (acc[note.date] = acc[note.date] || []).push(note);
-    return acc;
-  }, {});
-
-  return Object.keys(groups)
-    .sort((a, b) => (a < b ? 1 : -1))
-    .map((date) => {
-      const rows = [];
-      const items = groups[date];
-      for (let i = 0; i < items.length; i += columns) {
-        rows.push(items.slice(i, i + columns));
-      }
-      return { title: date, data: rows };
-    });
-}
-
-
-export default function Notes() {
-  const theme = useTheme();
-  const { theme: themeName, toggleTheme } = useContext(AppThemeContext);
-
-  const router = useRouter(); // <-- ADICIONADO
-
-  const { width } = useWindowDimensions();
-
-  const notes = [
-    { id: 1, title: "Primeira nota", date: "02/12/2025", preview: "Resumo: reunião..." },
-    { id: 2, title: "Ideias", date: "02/12/2025", preview: "Design do app..." },
-    { id: 3, title: "Estudos", date: "01/12/2025", preview: "Tópicos: vetores..." },
-    { id: 4, title: "Lista de compras", date: "01/12/2025", preview: "Leite, Pão, Café" },
-    { id: 5, title: "Rascunho", date: "01/12/2025", preview: "Escrever artigo..." },
-    { id: 6, title: "Projeto", date: "30/11/2025", preview: "Planejar sprint..." },
-  ];
-
-  const sidePadding = Math.max(16, Math.round(Math.min(28, width * 0.04)));
-  const columns = getColumnsForWidth(width);
-  const gapBetween = 12;
-
-  const availableWidth = width - sidePadding * 2 - gapBetween * (columns - 1);
-  const columnOuterWidth = Math.floor(availableWidth / columns);
-  const squareSize = Math.round(columnOuterWidth * 0.92);
-  const fontScale = Math.max(0.9, Math.min(1.6, columnOuterWidth / 140));
-
-  const sections = useMemo(() => buildSections(notes, columns), [notes, columns]);
-
-  const openNote = (note: any) => {
-    router.push(`/(notes)/${note.id}`);
+  const toggleTheme = () => {
+    const newTheme = themeName === 'light' ? 'dark' : 'light';
+    setThemeName(newTheme);
+  };
+ 
+  const getUniqueTags = () => {
+    const tags = notes
+      .map(note => note.tag)
+      .filter(t => t.trim() !== '')
+      .map(t => t.trim());
+    return ['Todos', ...Array.from(new Set(tags))];
   };
 
-  return (
-    <SafeAreaProvider>
-      <SafeAreaView
-        style={{
-          flex: 1,
-          paddingHorizontal: sidePadding,
-          backgroundColor: theme.background.val,
-        }}
-      >
-        {/* Topo */}
-        <View
-          style={{
-            paddingTop: 18,
-            paddingBottom: 6,
-            backgroundColor: theme.header.val,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <H1 color={theme.text.val}>Notepadd</H1>
+  const filteredNotes = notes.filter(note => {
+    const matchesSearch = note.title.toLowerCase().includes(searchText.toLowerCase());
+    const matchesTag = filterTag === 'Todos' || note.tag.trim() === filterTag;
+    return matchesSearch && matchesTag;
+  });
 
-            <TouchableOpacity
-              onPress={toggleTheme}
-              style={{
-                paddingVertical: 6,
-                paddingHorizontal: 12,
-                backgroundColor: theme.card.val,
-                borderRadius: 8,
-              }}
+  const loadNotes = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
+      if (jsonValue) setNotes(JSON.parse(jsonValue));
+    } catch (e) { console.error(e); }
+  };
+
+  const saveToStorage = async (updatedNotes: Note[]) => {
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedNotes));
+      setNotes(updatedNotes);
+    } catch (e) { console.error(e); }
+  };
+
+  const openNote = (note: Note) => {
+    setCurrentId(note.id);
+    setTitle(note.title);
+    setTag(note.tag);
+    setContent(note.content);
+    setIsEditingMode(false);
+    setView('editor');
+  };
+
+  const createNewNote = () => {
+    setCurrentId(null);
+    setTitle('');
+    setTag('');
+    setContent('');
+    setIsEditingMode(true);
+    setView('editor');
+  };
+
+  const saveAndClose = () => {
+    if (!title && !content && !currentId) {
+      setView('list');
+      return;
+    }
+
+    const now = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    let updatedNotes = [...notes];
+
+    if (currentId) {
+      updatedNotes = updatedNotes.map(n => 
+        n.id === currentId ? { ...n, title, tag, content, date: now } : n
+      );
+    } else {
+      const newNote: Note = {
+        id: Date.now().toString(),
+        title: title || 'Nota',
+        tag,
+        content,
+        date: now
+      };
+      updatedNotes.unshift(newNote);
+    }
+
+    saveToStorage(updatedNotes);
+    setView('list');
+  };
+
+  const deleteNote = () => {
+    Alert.alert("Excluir", "Tem certeza?", [
+      { text: "Cancelar" },
+      { 
+        text: "Excluir", style: "destructive", 
+        onPress: () => {
+          const updatedNotes = notes.filter(n => n.id !== currentId);
+          saveToStorage(updatedNotes);
+          setView('list');
+        }
+      }
+    ]);
+  };
+
+  const handleFormat = (prefix: string, suffix: string) => {
+    const { start, end } = selection;
+    const newText = content.substring(0, start) + prefix + content.substring(start, end) + suffix + content.substring(end);
+    setContent(newText);
+  };
+
+  const BotaoFerramenta = ({ label, onPress }: any) => (
+    <TouchableOpacity style={styles.toolBtn} onPress={onPress}>
+      <Text style={[styles.toolBtnText, { color: theme.color.val }]}>{label}</Text>
+    </TouchableOpacity>
+  );
+
+  if (view === 'list') {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background.val }]}>
+        <View style={styles.homeHeader}>
+          
+          {/* HEADER COM O TÍTULO */}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <Text style={[styles.homeTitle, { color: theme.color.val }]}>Notepadd</Text>
+            
+            {/* BOTÃO DO MODO ESCURO/CLARO */}
+            <TouchableOpacity 
+                style={{ 
+                    padding: 8, 
+                    borderRadius: 6, 
+                    backgroundColor: theme.backgroundStrong.val, 
+                }}
+                onPress={toggleTheme}
             >
-              <StyledText style={{ color: theme.text.val, fontWeight: "600" }}>
-                {themeName === "dark" ? "☀️ Claro" : "🌙 Escuro"}
-              </StyledText>
+                <Text style={{ color: theme.color.val, fontWeight: "600" }}>
+                    {themeName === "dark" ? "☀️ Claro" : "🌙 Escuro"}
+                </Text>
             </TouchableOpacity>
           </View>
+            
+          {/* CAMPO DE BUSCA */}
+          <TextInput 
+            style={[styles.searchBar, { 
+                borderColor: theme.borderColor.val, 
+                color: theme.color.val, 
+                backgroundColor: theme.backgroundStrong.val 
+            }]}
+            placeholder="pesquisar..."
+            placeholderTextColor={theme.color8.val}
+            value={searchText}
+            onChangeText={setSearchText}
+          />
 
-          <Text marginTop={10} fontSize={16} color={theme.text.val}>
-            Olá, usuário 👋
-          </Text>
-
-          <View
-            style={{
-              flexDirection: "row",
-              marginTop: 14,
-              justifyContent: "space-between",
-            }}
+          {/* LISTA DE FILTROS */}
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            style={styles.filtersContainer}
           >
-            <TouchableOpacity
-              style={{
-                padding: 10,
-                borderRadius: 10,
-                backgroundColor: theme.card.val,
-                flex: 1,
-                marginRight: 10,
-              }}
-            >
-              <Text color={theme.text.val}>Pesquisar</Text>
-            </TouchableOpacity>
+            {getUniqueTags().map((tagName, index) => {
+              const isSelected = filterTag === tagName;
+              return (
+                <TouchableOpacity 
+                  key={index} 
+                  style={[
+                      styles.filterChip, 
+                      { 
+                          backgroundColor: isSelected ? theme.blue9.val : theme.backgroundStrong.val,
+                          borderColor: isSelected ? theme.blue10.val : theme.borderColor.val,
+                      }
+                  ]}
+                  onPress={() => setFilterTag(tagName)}
+                >
+                  <Text 
+                      style={[
+                          styles.filterText, 
+                          { color: isSelected ? theme.color.val : theme.color10.val }
+                      ]}
+                  >
+                    {tagName}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
 
-            <TouchableOpacity
-              style={{
-                padding: 10,
-                borderRadius: 10,
-                backgroundColor: theme.card.val,
-                width: 90,
-                alignItems: "center",
-              }}
+        {/* LISTA DE NOTAS */}
+        <FlatList
+          data={filteredNotes}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.notesList}
+          numColumns={3}
+          columnWrapperStyle={styles.columnWrapper}
+          ListEmptyComponent={
+            <Text style={{ color: theme.color8.val, textAlign: 'center', marginTop: 50 }}>
+              {notes.length === 0 ? "Nenhuma nota criada." : "Nenhuma nota encontrada."}
+            </Text>
+          }
+          renderItem={({ item }) => (
+            <TouchableOpacity 
+                style={[styles.noteCard, { backgroundColor: theme.backgroundStrong.val, borderColor: theme.borderColor.val }]} 
+                onPress={() => openNote(item)}
             >
-              <Text color={theme.text.val}>Filtro</Text>
+              <View>
+                <Text style={[styles.noteCardTitle, { color: theme.color.val }]} numberOfLines={1}>
+                    {item.title || 'Nota'}
+                </Text>
+                <Text style={[styles.noteCardPreview, { color: theme.color9.val }]} numberOfLines={3} ellipsizeMode="tail">
+                    {item.content ? item.content.replace(/[#*`\[\]-]/g, '').trim() : ''}
+                </Text>
+              </View>
+              <View style={styles.cardFooter}>
+                {item.tag ? (
+                  <View style={[styles.tagBadge, { backgroundColor: theme.yellow6.val }]}>
+                    <Text style={[styles.tagText, { fontSize: 9, color: theme.yellow12.val }]}>{item.tag}</Text>
+                  </View>
+                ) : <View />}
+                <Text style={[styles.noteDate, { color: theme.color8.val }]}>{item.date}</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+
+        {/* FAB */}
+        <TouchableOpacity style={[styles.fab, { backgroundColor: theme.blue10.val }]} onPress={createNewNote}>
+          <Text style={[styles.fabText, { color: theme.color.val }]}>+</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background.val }]}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={saveAndClose} style={styles.backBtn}>
+            <Text style={[styles.backBtnText, { color: theme.color.val }]}>{'< Voltar'}</Text>
+          </TouchableOpacity>
+
+          <View style={styles.headerButtons}>
+            {currentId && (
+              <TouchableOpacity style={[styles.clearBtn, { backgroundColor: theme.red7.val }]} onPress={deleteNote}>
+                <Text style={[styles.clearBtnText, { color: theme.color.val }]}>Excluir</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity 
+              style={{ 
+                backgroundColor: isEditingMode ? theme.green9.val : theme.blue9.val, 
+                padding: 8, 
+                borderRadius: 6 
+              }}
+              onPress={() => setIsEditingMode(!isEditingMode)}
+            >
+              <Text style={{ color: theme.color.val, fontWeight: 'bold' }}>{isEditingMode ? 'Concluir' : 'Editar'}</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Lista */}
-        <SectionList
-          sections={sections}
-          keyExtractor={(item: any[], index) =>
-            item.map((n) => n.id).join("-") + "-" + index
-          }
-          stickySectionHeadersEnabled={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
-          renderSectionHeader={({ section: { title } }) => (
-            <RNView style={{ paddingTop: 18, paddingBottom: 8 }}>
-              <StyledText
-                style={{
-                  fontWeight: "700",
-                  fontSize: Math.max(14, 14 * fontScale),
-                  color: theme.text.val,
-                }}
-              >
-                {title}
-              </StyledText>
-            </RNView>
-          )}
-          renderItem={({ item }) => (
-            <RNView
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom: 8,
-              }}
-            >
-              {item.map((note: any) => (
-                <RNView
-                  key={note.id}
-                  style={{
-                    width: columnOuterWidth,
-                    marginRight: gapBetween,
-                    alignItems: "center",
-                  }}
-                >
-                  <NoteCard
-                    note={note}
-                    size={squareSize}
-                    fontScale={fontScale}
-                    onPress={openNote}
-                    theme={theme}
+        <View style={styles.contentContainer}>
+          {isEditingMode ? (
+            <>
+              <View style={styles.editorPane}>
+                <View style={styles.inputsContainer}>
+                  <TextInput 
+                    style={[styles.inputTitle, { color: theme.color.val, borderColor: theme.borderColor.val }]} 
+                    placeholder="Título..." 
+                    placeholderTextColor={theme.color8.val} 
+                    value={title} 
+                    onChangeText={setTitle} 
                   />
-                </RNView>
-              ))}
-
-              {item.length < columns &&
-                Array.from({ length: columns - item.length }).map((_, i) => (
-                  <RNView
-                    key={`empty-${i}`}
-                    style={{
-                      width: columnOuterWidth,
-                      marginRight: gapBetween,
-                    }}
+                  <TextInput 
+                    style={[styles.inputTag, { color: theme.color.val, borderColor: theme.borderColor.val }]} 
+                    placeholder="Tag" 
+                    placeholderTextColor={theme.color8.val} 
+                    value={tag} 
+                    onChangeText={setTag} 
                   />
-                ))}
-            </RNView>
+                </View>
+                <TextInput
+                  style={[styles.textArea, { color: theme.color.val, backgroundColor: theme.backgroundStrong.val }]} 
+                  multiline 
+                  placeholder="digite aqui..." 
+                  placeholderTextColor={theme.color7.val}
+                  value={content} 
+                  onChangeText={setContent}
+                  onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
+                  autoFocus
+                />
+              </View>
+              <View style={{ height: 60 }}>
+                <ScrollView horizontal style={[styles.toolbar, { backgroundColor: theme.backgroundStrong.val }]} contentContainerStyle={styles.toolbarContent} keyboardShouldPersistTaps="always">
+                  <BotaoFerramenta label="B" onPress={() => handleFormat('**', '**')} />
+                  <BotaoFerramenta label="I" onPress={() => handleFormat('*', '*')} />
+                  <BotaoFerramenta label="H1" onPress={() => handleFormat('# ', '')} />
+                  <BotaoFerramenta label="H2" onPress={() => handleFormat('## ', '')} />
+                  <BotaoFerramenta label="Lista" onPress={() => handleFormat('\n- ', '')} />
+                  <BotaoFerramenta label="Code" onPress={() => handleFormat('`', '`')} />
+                </ScrollView>
+              </View>
+            </>
+          ) : (
+            <ScrollView style={styles.previewPane}>
+              {title !== '' && <Text style={[styles.previewTitle, { color: theme.color.val }]}>{title}</Text>}
+              {tag !== '' && <View style={[styles.tagBadge, { backgroundColor: theme.yellow6.val }]}><Text style={[styles.tagText, { color: theme.yellow12.val }]}>{tag}</Text></View>}
+              <Markdown style={markdownStyles}>{content || '*Nota vazia*'}</Markdown>
+            </ScrollView>
           )}
-        />
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+};
+export default function App() {
+  const [themeName, setThemeName] = useState<'light' | 'dark'>('light');
 
-        {/* BOTÃO + */}
-        <TouchableOpacity
-          onPress={() => router.push("/(notes)/new")}
-          style={{
-            position: "absolute",
-            bottom: 24,
-            right: 24,
-            backgroundColor: theme.contrast.val,
-            width: 60,
-            height: 60,
-            borderRadius: 30,
-            justifyContent: "center",
-            alignItems: "center",
-
-            elevation: 8,
-            shadowColor: "#000",
-            shadowOpacity: 0.25,
-            shadowRadius: 5,
-            shadowOffset: { width: 0, height: 2 },
-          }}
-        >
-          <StyledText style={{ 
-            fontSize: 32, 
-            color: theme.contrastText.val, 
-            marginBottom: 4 
-          }}>
-            +
-          </StyledText>
-        </TouchableOpacity>
-
-      </SafeAreaView>
-    </SafeAreaProvider>
+  return (
+    <TamaguiProvider config={tamaguiConfig} defaultTheme={themeName}>
+      <NotesAppContent themeName={themeName} setThemeName={setThemeName} />
+    </TamaguiProvider>
   );
 }
