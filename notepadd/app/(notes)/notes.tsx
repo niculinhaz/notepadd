@@ -13,9 +13,9 @@ import { useRouter } from "expo-router";
 
 import { AppThemeContext } from "../_layout";
 
-// ------------------------------------------------------------
-// Helper: define número de colunas conforme largura da tela
-// ------------------------------------------------------------
+//testeeee
+// número de colunas conforme largura da tela
+
 function getColumnsForWidth(width: number) {
   if (width >= 1200) return 5;
   if (width >= 900) return 4;
@@ -23,9 +23,6 @@ function getColumnsForWidth(width: number) {
   return 2;
 }
 
-// ------------------------------------------------------------
-// Componente NoteCard responsivo
-// ------------------------------------------------------------
 function NoteCard({
   note,
   size,
@@ -103,9 +100,9 @@ function NoteCard({
   );
 }
 
-// ------------------------------------------------------------
-// Agrupa notas por data e cria linhas responsivas
-// ------------------------------------------------------------
+
+//notas por data e cria linhas responsivas
+
 function buildSections(notes: any[], columns: number) {
   const groups = notes.reduce((acc: Record<string, any[]>, note) => {
     (acc[note.date] = acc[note.date] || []).push(note);
@@ -124,9 +121,7 @@ function buildSections(notes: any[], columns: number) {
     });
 }
 
-// ------------------------------------------------------------
-// Componente principal
-// ------------------------------------------------------------
+
 export default function Notes() {
   const theme = useTheme();
   const { theme: themeName, toggleTheme } = useContext(AppThemeContext);
@@ -299,7 +294,7 @@ export default function Notes() {
           )}
         />
 
-        {/* BOTÃO FLUTUANTE */}
+        {/* BOTÃO + */}
         <TouchableOpacity
           onPress={() => router.push("/(notes)/new")}
           style={{
