@@ -4,10 +4,9 @@ import {
   TouchableOpacity,
   View as RNView,
   useWindowDimensions,
-  Text as RNText,
 } from "react-native";
-import { View, Text, useTheme } from "@tamagui/core";
-import { H1 } from "tamagui";
+import { StyledText, Text, H1 } from '@/components/StyledText'; // importa o StyledText, usa no lugar de RNText
+import { View, useTheme } from "@tamagui/core";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 
@@ -60,7 +59,7 @@ function NoteCard({
           overflow: "hidden",
         }}
       >
-        <RNText
+        <StyledText
           numberOfLines={2}
           style={{
             fontSize: Math.max(10, Math.round(size * 0.12)),
@@ -70,7 +69,7 @@ function NoteCard({
           }}
         >
           {note.preview ?? note.title?.slice(0, 40)}
-        </RNText>
+        </StyledText>
       </RNView>
 
       <Text
@@ -189,9 +188,9 @@ export default function Notes() {
                 borderRadius: 8,
               }}
             >
-              <RNText style={{ color: theme.text.val, fontWeight: "600" }}>
+              <StyledText style={{ color: theme.text.val, fontWeight: "600" }}>
                 {themeName === "dark" ? "☀️ Claro" : "🌙 Escuro"}
-              </RNText>
+              </StyledText>
             </TouchableOpacity>
           </View>
 
@@ -242,7 +241,7 @@ export default function Notes() {
           contentContainerStyle={{ paddingBottom: 40 }}
           renderSectionHeader={({ section: { title } }) => (
             <RNView style={{ paddingTop: 18, paddingBottom: 8 }}>
-              <RNText
+              <StyledText
                 style={{
                   fontWeight: "700",
                   fontSize: Math.max(14, 14 * fontScale),
@@ -250,7 +249,7 @@ export default function Notes() {
                 }}
               >
                 {title}
-              </RNText>
+              </StyledText>
             </RNView>
           )}
           renderItem={({ item }) => (
@@ -315,13 +314,13 @@ export default function Notes() {
             shadowOffset: { width: 0, height: 2 },
           }}
         >
-          <RNText style={{ 
+          <StyledText style={{ 
             fontSize: 32, 
             color: theme.contrastText.val, 
             marginBottom: 4 
           }}>
             +
-          </RNText>
+          </StyledText>
         </TouchableOpacity>
 
       </SafeAreaView>
