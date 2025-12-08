@@ -1,12 +1,14 @@
-import { Stack } from 'expo-router';
-import { StatusBar } from 'react-native';
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { useFonts } from 'expo-font';
-import * as SplashScreen from 'expo-splash-screen';
-import { createTamagui, TamaguiProvider } from 'tamagui';
-import { defaultConfig } from '@tamagui/config/v4';
+import { initDatabase } from "@/database/database";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { defaultConfig } from '@tamagui/config/v4';
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { SQLiteProvider } from "expo-sqlite";
 import * as SystemUI from 'expo-system-ui';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { StatusBar } from 'react-native';
+import { createTamagui, TamaguiProvider } from 'tamagui';
 
 const config = createTamagui(defaultConfig);
 
@@ -70,29 +72,31 @@ export default function RootLayout() {
   return (
     <ThemeContext.Provider value={{ theme, isDarkMode, toggleTheme }}>
       <TamaguiProvider config={config} defaultTheme={theme}>
+        <SQLiteProvider databaseName="notepadd.db" onInit={initDatabase}>
         <StatusBar 
           barStyle={isDarkMode ? "light-content" : "dark-content"} 
           backgroundColor={backgroundColor} 
         />
-        <Stack 
-          screenOptions={{ 
-            headerShown: false, 
-            contentStyle: { backgroundColor: backgroundColor },
-            animation: 'slide_from_right',
-          }}
-        >
-          {/* Tela Inicial */}
-          <Stack.Screen name="(notes)/notes" />
+          <Stack 
+            screenOptions={{ 
+              headerShown: false, 
+              contentStyle: { backgroundColor: backgroundColor },
+              animation: 'slide_from_right',
+            }}
+          >
+            {/* Tela Inicial */}
+            <Stack.Screen name="(notes)/notes" />
 
-          {/* Tela da Nota */}
-          <Stack.Screen 
-            name="(notes)/[noteId]" 
-            options={{ 
-              presentation: 'card',
-              gestureEnabled: true,
-            }} 
-          />
-        </Stack>
+            {/* Tela da Nota */}
+            <Stack.Screen 
+              name="(notes)/[noteId]" 
+              options={{ 
+                presentation: 'card',
+                gestureEnabled: true,
+              }} 
+            />
+          </Stack>
+        </SQLiteProvider>
       </TamaguiProvider>
     </ThemeContext.Provider>
   );
