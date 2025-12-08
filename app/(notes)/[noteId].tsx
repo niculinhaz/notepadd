@@ -4,6 +4,8 @@ import { useLocalSearchParams, router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useThemeContext } from '../_layout';
+import { useThemeStyles } from '../../constants/theme';
 import { Editor } from '../../components/ui/editor';
 import { Note } from '../../types';
 
@@ -12,6 +14,9 @@ const STORAGE_KEY = '@my_notes_app_final_v3';
 export default function NoteDetailScreen() {
   const { noteId } = useLocalSearchParams();
   const isNew = noteId === 'new';
+
+  const { isDarkMode } = useThemeContext();
+  const styles = useThemeStyles(isDarkMode);
 
   const [notes, setNotes] = useState<Note[]>([]);
   const [title, setTitle] = useState('');
@@ -72,7 +77,7 @@ export default function NoteDetailScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#050505' }} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <Editor
         title={title} setTitle={setTitle}
         tag={tag} setTag={setTag}

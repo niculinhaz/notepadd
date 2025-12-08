@@ -13,7 +13,8 @@ import Markdown from "react-native-markdown-display";
 import * as Haptics from "expo-haptics";
 import { Feather } from "@expo/vector-icons";
 
-import { styles, markdownStyles } from "../../constants/theme";
+import { useThemeStyles, markdownStylesGen } from "../../constants/theme";
+import { useThemeContext } from "../../app/_layout";
 
 interface Props {
   title: string;
@@ -41,6 +42,21 @@ export const Editor = ({
   onDelete,
 }: Props) => {
   const [selection, setSelection] = useState({ start: 0, end: 0 });
+
+
+  const { isDarkMode } = useThemeContext();
+  const styles = useThemeStyles(isDarkMode);
+  const markdownStyles = markdownStylesGen(isDarkMode);
+
+  const colors = {
+    bg: isDarkMode ? "#050505" : "#f8f9fa",
+    text: isDarkMode ? "#fff" : "#000",
+    border: isDarkMode ? "#222" : "#e0e0e0",
+    icon: isDarkMode ? "#fff" : "#000",
+    placeholder: isDarkMode ? "#555" : "#999",
+    okBtn: isDarkMode ? "rgba(99, 175, 226, 1)" : "#007acc",
+    deleteBtn: "#cf6679"
+  };
 
   const performHaptic = () => {
     Haptics.selectionAsync();
@@ -74,7 +90,7 @@ export const Editor = ({
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#050505" }}>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <View
         style={{
           paddingTop: 32,
@@ -85,18 +101,18 @@ export const Editor = ({
           justifyContent: "space-between",
           alignItems: "center",
           borderBottomWidth: 1,
-          borderBottomColor: "#222",
-          backgroundColor: "#050505",
+          borderBottomColor: colors.border,
+          backgroundColor: colors.bg,
           zIndex: 50,
         }}
       >
         <TouchableOpacity onPress={handleExit} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Feather name="chevron-left" size={25} color="#fff" />
+            <Feather name="chevron-left" size={25} color={colors.icon} />
             <Text
               style={{
                 fontSize: 20,
-                color: "#fff",
+                color: colors.text,
                 marginLeft: 4,
                 lineHeight: 22,
               }}
@@ -112,7 +128,7 @@ export const Editor = ({
               style={{
                 fontSize: 18,
                 fontWeight: "bold",
-                color: "rgba(99, 175, 226, 1)",
+                color: colors.okBtn,
               }}
             >
               OK
@@ -120,7 +136,7 @@ export const Editor = ({
           </TouchableOpacity>
         ) : (
           <TouchableOpacity onPress={onDelete} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Feather name="trash-2" size={22} color="#cf6679" />
+            <Feather name="trash-2" size={22} color={colors.deleteBtn} />
           </TouchableOpacity>
         )}
       </View>
@@ -144,14 +160,14 @@ export const Editor = ({
                 <TextInput
                   style={styles.inputTitle}
                   placeholder="Título"
-                  placeholderTextColor="#555"
+                  placeholderTextColor={colors.placeholder}
                   value={title}
                   onChangeText={setTitle}
                 />
                 <TextInput
                   style={styles.inputTag}
                   placeholder="#tag"
-                  placeholderTextColor="#555"
+                  placeholderTextColor={colors.placeholder}
                   value={tag}
                   onChangeText={setTag}
                 />
@@ -161,7 +177,7 @@ export const Editor = ({
                 style={styles.textArea}
                 multiline
                 placeholder="Digite aqui..."
-                placeholderTextColor="#444"
+                placeholderTextColor={colors.placeholder}
                 value={content}
                 onChangeText={setContent}
                 onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
@@ -169,7 +185,6 @@ export const Editor = ({
               />
             </View>
 
-            {/* TOOLBAR */}
             <View style={[styles.toolbar, { marginTop: 16 }]}>
               <ScrollView
                 horizontal
@@ -198,7 +213,11 @@ export const Editor = ({
         ) : (
           <View style={{ flex: 1 }}>
             <ScrollView style={styles.previewPane} contentContainerStyle={{ paddingBottom: 40 }}>
-              <TouchableOpacity activeOpacity={1} onPress={toggleToEdit}>
+              <TouchableOpacity 
+                activeOpacity={1} 
+                onPress={toggleToEdit} 
+                style={{ minHeight: 200 }}
+              >
                 <Text style={styles.previewTitle}>{title}</Text>
 
                 {tag ? (
@@ -207,7 +226,17 @@ export const Editor = ({
                   </View>
                 ) : null}
 
-                <Markdown style={markdownStyles}>{content}</Markdown>
+                {(!content || content.trim() === '') ? (
+                  <Text style={{ 
+                      color: colors.placeholder, 
+                      fontSize: 18, 
+                      marginTop: 10,
+                  }}>
+                    Pressione para começar a digitar
+                  </Text>
+                ) : (
+                   <Markdown style={markdownStyles}>{content}</Markdown>
+                )}
               </TouchableOpacity>
             </ScrollView>
           </View>

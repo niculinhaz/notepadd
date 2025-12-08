@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, TouchableOpacity, TouchableWithoutFeedback, View, Text, ScrollView } from 'react-native';
 import { Feather } from "@expo/vector-icons";
-import { styles } from '../../constants/theme';
+import { useThemeStyles } from '../../constants/theme';
 
 interface TagCount {
   name: string;
@@ -15,7 +15,6 @@ interface Props {
   selectedTag: string;
   onSelectTag: (tag: string) => void;
 
-  // 🔥 adicionados para o botão de tema
   isDarkMode: boolean;
   onToggleTheme: () => void;
 }
@@ -29,6 +28,8 @@ export const FilterDrawer = ({
   isDarkMode,
   onToggleTheme
 }: Props) => {
+  const styles = useThemeStyles(isDarkMode);
+
   return (
     <Modal visible={visible} transparent={true} animationType="fade" onRequestClose={onClose}>
       <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={onClose}>
@@ -59,7 +60,6 @@ export const FilterDrawer = ({
               ))}
             </ScrollView>
 
-            {/* 🔥 BOTÃO DE MODO CLARO/ESCURO */}
             <TouchableOpacity
               onPress={onToggleTheme}
               style={{
@@ -69,7 +69,7 @@ export const FilterDrawer = ({
                 width: 48,
                 height: 48,
                 borderRadius: 24,
-                backgroundColor: "#333",
+                backgroundColor: isDarkMode ? "#333" : "#f0f0f0", 
                 justifyContent: "center",
                 alignItems: "center",
                 shadowColor: "#000",
@@ -77,12 +77,14 @@ export const FilterDrawer = ({
                 shadowRadius: 6,
                 shadowOffset: { width: 0, height: 3 },
                 elevation: 5,
+                borderWidth: isDarkMode ? 0 : 1,
+                borderColor: '#e0e0e0'
               }}
             >
               <Feather
                 name={isDarkMode ? "sun" : "moon"}
                 size={24}
-                color="#fff"
+                color={isDarkMode ? "#fff" : "#000"}
               />
             </TouchableOpacity>
 

@@ -2,18 +2,18 @@ import React, { useState, useCallback } from 'react';
 import { 
   View as RNView,  
   TouchableOpacity,
-  useWindowDimensions,
   FlatList, 
   TextInput,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect, router } from 'expo-router';
 
-import { Text, H1 } from '@/components/ui/StyledText'; // importa o StyledText
-import { View, useTheme } from "@tamagui/core";
-import { styles } from '../../constants/theme';
+import { Text } from '@/components/ui/StyledText';
+import { useThemeStyles } from '../../constants/theme';
+import { useThemeContext } from '../_layout';
 import { NoteCard } from '../../components/ui/note-card';
 import { FilterDrawer } from '../../components/ui/filter-drawer';
 import { Note } from '../../types/index';
@@ -26,6 +26,9 @@ export default function NotesScreen() {
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState('Todas as notas');
+
+  const { isDarkMode, toggleTheme } = useThemeContext();
+  const styles = useThemeStyles(isDarkMode);
 
   useFocusEffect(
     useCallback(() => {
@@ -71,6 +74,12 @@ export default function NotesScreen() {
     return result;
   };
 
+  const filteredNotes = getFilteredNotes();
+  const iconColor = isDarkMode ? '#fff' : '#000';
+  const iconSecColor = isDarkMode ? '#666' : '#888';
+  
+  const placeholderColor = isDarkMode ? '#555' : '#aaa';
+
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       
@@ -79,50 +88,65 @@ export default function NotesScreen() {
         onClose={() => setIsDrawerOpen(false)} 
         tags={getTagsWithCounts()} 
         selectedTag={selectedTag} 
-        onSelectTag={handleSelectTag} 
+        onSelectTag={handleSelectTag}
+        isDarkMode={isDarkMode}
+        onToggleTheme={toggleTheme}
       />
 
-      {/* HEADER */}
       <View style={styles.headerTop}>
         <TouchableOpacity onPress={() => setIsDrawerOpen(true)} style={styles.menuBtn}>
-           <Feather name="menu" size={28} color="#fff" />
+           <Feather name="menu" size={28} color={iconColor} />
         </TouchableOpacity>
         <Text style={styles.appLogo}>notepadd</Text>
         <View style={{width: 28}} /> 
       </View>
 
-      {/* BUSCA (SEM ÍCONE DE FILTRO) */}
       <View style={styles.searchSection}>
         <View style={styles.searchBarContainer}>
-          <Feather name="search" size={20} color="#666" />
+          <Feather name="search" size={20} color={iconSecColor} />
           <TextInput 
-            style={styles.searchInput} placeholder="pesquisar" placeholderTextColor="#666" 
-            value={searchText} onChangeText={setSearchText} 
+            style={styles.searchInput} 
+            placeholder="pesquisar" 
+            placeholderTextColor={iconSecColor} 
+            value={searchText} 
+            onChangeText={setSearchText} 
           />
         </View>
       </View>
 
-      {/* INFO ROW */}
       <View style={styles.infoRow}>
-        <Text style={styles.infoText}>{selectedTag} ({getFilteredNotes().length})</Text>
+        <Text style={styles.infoText}>{selectedTag} ({filteredNotes.length})</Text>
         <TouchableOpacity style={styles.sortButton} onPress={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}>
-            <Feather name={sortOrder === 'desc' ? "arrow-down" : "arrow-up"} size={12} color="#666" />
+            <Feather name={sortOrder === 'desc' ? "arrow-down" : "arrow-up"} size={12} color={iconSecColor} />
             <Text style={styles.sortText}>data de criação</Text>
         </TouchableOpacity>
       </View>
 
-      {/* LISTA */}
-      <FlatList
-        data={getFilteredNotes()}
-        keyExtractor={item => item.id}
-        contentContainerStyle={styles.notesList}
-        numColumns={2}
-        columnWrapperStyle={styles.columnWrapper}
-        renderItem={({ item }) => <NoteCard item={item} />}
-      />
+      {filteredNotes.length === 0 ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingBottom: 100 }}>
+          <Text style={{ 
+            color: placeholderColor, 
+            fontSize: 18, 
+            textAlign: 'center', 
+            lineHeight: 28,
+            fontWeight: '500'
+          }}>
+            você não criou{'\n'}nenhuma nota ainda :(
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredNotes}
+          keyExtractor={item => item.id}
+          contentContainerStyle={styles.notesList}
+          numColumns={2}
+          columnWrapperStyle={styles.columnWrapper}
+          renderItem={({ item }) => <NoteCard item={item} />}
+        />
+      )}
 
       <TouchableOpacity style={styles.fab} onPress={() => router.push('/(notes)/new')}>
-        <Feather name="plus" size={32} color="#000" />
+        <Feather name="plus" size={32} color={isDarkMode ? '#000' : '#fff'} />
       </TouchableOpacity>
     </SafeAreaView>
   );
