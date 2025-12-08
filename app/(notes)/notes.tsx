@@ -6,12 +6,14 @@ import {
   Image,
   TextInput,
   TouchableOpacity,
-  View
+  View,
+  BackHandler,
+  Modal
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/StyledText';
-import { getAllNotes } from '@/database/database';
+import { getAllNotes, deleteNotesBulk } from '@/database/database';
 import { Note } from '@/type';
 import { useSQLiteContext } from 'expo-sqlite';
 import { FilterDrawer } from '../../components/ui/filter-drawer';
@@ -26,6 +28,11 @@ export default function NotesScreen() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState('Todas as notas');
   
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false); 
+  
+  const isSelectionMode = selectedIds.length > 0;
+  
   const db = useSQLiteContext();
   const { isDarkMode, toggleTheme } = useThemeContext();
   const styles = useThemeStyles(isDarkMode);
@@ -33,19 +40,49 @@ export default function NotesScreen() {
   useFocusEffect(
     useCallback(() => {
       loadNotes();
-    }, [])
+      const onBackPress = () => {
+        if (isSelectionMode) {
+          setSelectedIds([]); 
+          return true; 
+        }
+        return false; 
+      };
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => subscription.remove();
+    }, [isSelectionMode])
   );
 
   const loadNotes = async () => {
     try {
       const fetchedNotes = await getAllNotes(db);
-      console.log(fetchedNotes);
-      if (fetchedNotes.length > 0) 
-        setNotes(fetchedNotes);
+      setNotes(fetchedNotes || []);
     } 
-    catch (e) { 
-      console.error(e); 
+    catch (e) { console.error(e); }
+  };
+
+  const handleLongPress = (id: string) => {
+    if (!isSelectionMode) setSelectedIds([id]);
+  };
+
+  const handleToggleSelect = (id: string) => {
+    if (selectedIds.includes(id)) {
+      setSelectedIds(selectedIds.filter(item => item !== id));
+    } else {
+      setSelectedIds([...selectedIds, id]);
     }
+  };
+
+  const handleDeleteButtonPress = () => {
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await deleteNotesBulk(db, selectedIds);
+      setSelectedIds([]); 
+      setShowDeleteModal(false); 
+      loadNotes();
+    } catch (e) { console.error(e); }
   };
 
   const getTagsWithCounts = () => {
@@ -74,7 +111,10 @@ export default function NotesScreen() {
     result.sort((a, b) => {
       const timeA = Number(a.id);
       const timeB = Number(b.id);
-      return sortOrder === 'desc' ? timeB - timeA : timeA - timeB;
+      if(!isNaN(timeA) && !isNaN(timeB)) {
+          return sortOrder === 'desc' ? timeB - timeA : timeA - timeB;
+      }
+      return 0; 
     });
     return result;
   };
@@ -98,35 +138,52 @@ export default function NotesScreen() {
       />
 
       <View style={styles.headerTop}>
-        <TouchableOpacity onPress={() => setIsDrawerOpen(true)} style={styles.menuBtn}>
-           <Feather name="menu" size={28} color={iconColor} />
-        </TouchableOpacity>
-        <View style={{ flex: 1, alignItems: 'flex-end'}}>
-        <Image 
-          source={isDarkMode 
-            ? require('../../assets/images/notepaddlogo.png')
-            : require('../../assets/images/notepaddlogolight.png')
-          } 
-          style={{ width: 160, height: 40 }}
-          resizeMode="contain"
-        />
-        </View> 
+        {isSelectionMode ? (
+          <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 15 }}>
+              <TouchableOpacity onPress={() => setSelectedIds([])}>
+                 <Feather name="x" size={24} color={iconColor} />
+              </TouchableOpacity>
+              <Text style={{ fontSize: 18, fontWeight: 'bold', color: iconColor }}>
+                {selectedIds.length}
+              </Text>
+            </View>
+            <TouchableOpacity onPress={handleDeleteButtonPress}>
+              <Feather name="trash-2" size={24} color="#cf6679" />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            <TouchableOpacity onPress={() => setIsDrawerOpen(true)} style={styles.menuBtn}>
+               <Feather name="menu" size={28} color={iconColor} />
+            </TouchableOpacity>
+            <View style={{ flex: 1, alignItems: 'flex-end'}}>
+            <Image 
+              source={isDarkMode 
+                ? require('../../assets/images/notepaddlogo.png')
+                : require('../../assets/images/notepaddlogolight.png')
+              } 
+              style={{ width: 160, height: 40 }}
+              resizeMode="contain"
+            />
+            </View> 
+          </>
+        )}
       </View>
 
       <View style={styles.searchSection}>
-        <View style={styles.searchBarContainer}>
+        <View style={[styles.searchBarContainer, { opacity: isSelectionMode ? 0.3 : 1 }]}>
           <Feather name="search" size={20} color={iconSecColor} />
-          
           <TextInput 
             style={[styles.searchInput, { fontFamily: 'SF-Pro' }]} 
             placeholder="pesquisar" 
             placeholderTextColor={iconSecColor} 
             value={searchText} 
             onChangeText={setSearchText} 
+            editable={!isSelectionMode} 
           />
-
           {searchText.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchText('')} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+            <TouchableOpacity onPress={() => setSearchText('')} disabled={isSelectionMode}>
               <Feather name="x" size={20} color={iconSecColor} />
             </TouchableOpacity>
           )}
@@ -135,7 +192,11 @@ export default function NotesScreen() {
 
       <View style={styles.infoRow}>
         <Text style={styles.infoText}>{selectedTag} ({filteredNotes.length})</Text>
-        <TouchableOpacity style={styles.sortButton} onPress={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}>
+        <TouchableOpacity 
+            style={styles.sortButton} 
+            onPress={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+            disabled={isSelectionMode}
+        >
             <Feather name={sortOrder === 'desc' ? "arrow-down" : "arrow-up"} size={12} color={iconSecColor} />
             <Text style={styles.sortText}>data de criação</Text>
         </TouchableOpacity>
@@ -160,13 +221,60 @@ export default function NotesScreen() {
           contentContainerStyle={styles.notesList}
           numColumns={2}
           columnWrapperStyle={styles.columnWrapper}
-          renderItem={({ item }) => <NoteCard item={item} />}
+          renderItem={({ item }) => (
+            <NoteCard 
+              item={item}
+              isSelectionMode={isSelectionMode}
+              isSelected={selectedIds.includes(item.id)}
+              onLongPress={handleLongPress}
+              onSelect={handleToggleSelect}
+            />
+          )}
         />
       )}
 
-      <TouchableOpacity style={styles.fab} onPress={() => router.push('/(notes)/new')}>
-        <Feather name="plus" size={32} color={isDarkMode ? '#000' : '#fff'} />
-      </TouchableOpacity>
+      {!isSelectionMode && (
+        <TouchableOpacity style={styles.fab} onPress={() => router.push('/(notes)/new')}>
+          <Feather name="plus" size={32} color={isDarkMode ? '#000' : '#fff'} />
+        </TouchableOpacity>
+      )}
+
+      {}
+      <Modal
+        visible={showDeleteModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View style={styles.modalCenterOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>
+              Excluir Nota(s): 
+            </Text>
+            
+            <Text style={styles.modalText}>
+              Tem certeza que deseja apagar {selectedIds.length} nota(s) permanentemente?
+            </Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                onPress={() => setShowDeleteModal(false)}
+                style={styles.btnCancel}
+              >
+                <Text style={styles.btnTextCancel}>Cancelar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                onPress={confirmDelete}
+                style={styles.btnDelete}
+              >
+                <Text style={styles.btnTextDelete}>Excluir</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }

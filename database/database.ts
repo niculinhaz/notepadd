@@ -41,3 +41,9 @@ export async function getNoteById(db: SQLite.SQLiteDatabase, id: string): Promis
 export async function deleteNoteById(db: SQLite.SQLiteDatabase, id: string) {
     await db.runAsync('DELETE FROM notes WHERE id = ?', id);
 }
+
+export async function deleteNotesBulk(db: SQLite.SQLiteDatabase, ids: string[]) {
+    if (ids.length === 0) return;
+    const placeholders = ids.map(() => '?').join(',');
+    await db.runAsync(`DELETE FROM notes WHERE id IN (${placeholders})`, ids);
+}

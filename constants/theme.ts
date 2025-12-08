@@ -13,7 +13,11 @@ const darkColors = {
   drawerBg: '#161616',
   divider: '#222',
   tint: '#61dafb',
-  inputBg: '#0a0a0a'
+  inputBg: '#0a0a0a',
+  modalBg: '#1e1e1e',
+  modalBorder: '#333',
+  cancelBtn: '#333',
+  deleteBtn: '#cf6679',
 };
 
 const lightColors = {
@@ -27,7 +31,11 @@ const lightColors = {
   drawerBg: '#ffffff',
   divider: '#eee',
   tint: '#007acc', 
-  inputBg: '#f1f3f5'
+  inputBg: '#f1f3f5',
+  modalBg: '#ffffff',
+  modalBorder: '#e0e0e0',
+  cancelBtn: '#f0f0f0',
+  deleteBtn: '#cf6679',
 };
 
 const createStyles = (isDark: boolean) => {
@@ -46,7 +54,7 @@ const createStyles = (isDark: boolean) => {
     },
     menuBtn: { padding: 5 },
     appLogo: { fontSize: 22, fontWeight: 'bold', color: c.text, letterSpacing: 1 },
-
+    
     searchSection: { paddingHorizontal: 20, marginBottom: 15 },
     searchBarContainer: {
       flexDirection: 'row', alignItems: 'center', backgroundColor: c.searchBg,
@@ -110,16 +118,16 @@ const createStyles = (isDark: boolean) => {
       marginBottom: 12, 
       fontFamily: 'SF-Pro',
     },
-
+    
     cardFooterContainer: { justifyContent: 'flex-end' },
-
+    
     cardTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, gap: 8 },
-
+    
     noteCardTitle: { 
       color: c.text, 
-      fontSize: 15,  
-      flex: 1,
-      fontFamily: 'SF-Pro-Bold',
+      fontSize: 15, 
+      flex: 1, 
+      fontFamily: 'SF-Pro-Bold', 
     },
 
     miniTagBadge: { backgroundColor: isDark ? 'rgba(97, 218, 251, 0.15)' : 'rgba(0, 122, 204, 0.1)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
@@ -140,14 +148,14 @@ const createStyles = (isDark: boolean) => {
     backBtn: { padding: 5 },
     backBtnText: { color: c.text, fontSize: 16, fontFamily: 'SF-Pro', },
     headerButtons: { flexDirection: 'row', gap: 10 },
-    
-    editorPane: { flex: 1, padding: 20, backgroundColor: c.bg },
-  
-    inputsContainer: { marginBottom: 20, gap: 15 },
 
+    editorPane: { flex: 1, padding: 20, backgroundColor: c.bg },
+    
+    inputsContainer: { marginBottom: 20, gap: 15 },
+    
     inputTitle: {
       backgroundColor: c.cardBg, color: c.text, padding: 12, borderRadius: 8,
-      fontSize: 16, fontWeight: '600', borderWidth: 1, borderColor: c.cardBorder,
+      fontSize: 16, fontWeight: '600', borderWidth: 1, borderColor: c.cardBorder, 
       fontFamily: 'SF-Pro-Bold',
     },
     inputTag: {
@@ -172,7 +180,7 @@ const createStyles = (isDark: boolean) => {
       minWidth: Math.ceil(width / 10), alignItems: 'center', justifyContent: 'center',
     },
     toolBtnText: { color: isDark ? '#000' : '#fff', fontWeight: 'bold', fontSize: 14, fontFamily: 'SF-Pro-Bold', },
-    
+
     previewPane: { flex: 1, padding: 20, backgroundColor: c.bg },
     previewTitle: { fontSize: 32, color: c.text, marginBottom: 15, fontFamily: 'SF-Pro-Bold', },
     tagBadge: {
@@ -180,6 +188,26 @@ const createStyles = (isDark: boolean) => {
       paddingHorizontal: 15, borderRadius: 20, marginBottom: 25,
     },
     tagText: { color: isDark ? '#000' : '#fff', fontSize: 14, textTransform: 'uppercase', fontFamily: 'SF-Pro-Bold', },
+
+    modalCenterOverlay: {
+      flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 20
+    },
+    modalBox: {
+      width: width * 0.85, backgroundColor: c.modalBg, borderRadius: 12, padding: 24,
+      borderWidth: 1, borderColor: c.modalBorder,
+      shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 10
+    },
+    modalTitle: { fontSize: 20, fontWeight: 'bold', color: c.text, marginBottom: 10, fontFamily: 'SF-Pro' },
+    modalText: { fontSize: 16, color: c.textSec, marginBottom: 24, lineHeight: 22, fontFamily: 'SF-Pro' },
+    modalButtons: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12 },
+    btnCancel: {
+      justifyContent: 'center', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8, backgroundColor: c.cancelBtn,
+    },
+    btnDelete: {
+      justifyContent: 'center', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8, backgroundColor: c.deleteBtn,
+    },
+    btnTextCancel: { color: c.text, fontWeight: 'regular', fontFamily: 'SF-Pro' },
+    btnTextDelete: { color: '#fff', fontWeight: 'bold', fontFamily: 'SF-Pro' }
   });
 };
 
@@ -200,7 +228,7 @@ export const markdownStylesGen = (isDark: boolean) => ({
 
   const isDark = useColorScheme() === 'dark';
 
-  export const editorStyle = {
+export const editorStyle = {
     backgroundColor: isDark ? darkColors.cardBg : lightColors.cardBg,
     caretColor: isDark ? darkColors.tint : lightColors.tint,
     color: isDark ? darkColors.text : lightColors.text,
