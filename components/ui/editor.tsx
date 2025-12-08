@@ -1,21 +1,25 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  View,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  Platform,
-  KeyboardAvoidingView,
+  View,
 } from "react-native";
 
-import Markdown from "react-native-markdown-display";
-import * as Haptics from "expo-haptics";
 import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import Markdown from "react-native-markdown-display";
+import { actions, RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 
-import { useThemeStyles, markdownStylesGen } from "../../constants/theme";
-import { useThemeContext } from "../../app/_layout";
 import { autoPlacement } from "@floating-ui/core";
+import { useThemeContext } from "../../app/_layout";
+import { editorStyle, markdownStylesGen, useThemeStyles } from "../../constants/theme";
+
+const converter = require('@vimeiro-co/react-native-html-to-markdown');
 
 interface Props {
   title: string;
@@ -42,13 +46,14 @@ export const Editor = ({
   onSave,
   onDelete,
 }: Props) => {
-  const [selection, setSelection] = useState({ start: 0, end: 0 });
-
-
+  const editorRef = useRef<RichEditor>(null);
+  
   const { isDarkMode } = useThemeContext();
   const styles = useThemeStyles(isDarkMode);
   const markdownStyles = markdownStylesGen(isDarkMode);
 
+  const [keyboardAvoidingViewKey, setKeyboardAvoidingViewKey] = useState('keyboardAvoidingView');
+  
   const colors = {
     bg: isDarkMode ? "#050505" : "#f8f9fa",
     text: isDarkMode ? "#fff" : "#000",
@@ -58,6 +63,23 @@ export const Editor = ({
     okBtn: isDarkMode ? "rgba(99, 175, 226, 1)" : "#007acc",
     deleteBtn: "#cf6679"
   };
+
+  const keyboardHideListenerCallback = useCallback(() => {
+    setKeyboardAvoidingViewKey(
+      'keyboardAvoidingViewKey' + new Date().getTime(),
+    );
+  }, []);
+
+  useEffect(() => {
+    const keyboardHideListener = Keyboard.addListener(
+      Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide',
+      keyboardHideListenerCallback,
+    );
+
+    return () => {
+      keyboardHideListener.remove();
+    };
+  }, [keyboardHideListenerCallback]);
 
   const performHaptic = () => {
     Haptics.selectionAsync();
@@ -79,15 +101,12 @@ export const Editor = ({
     setIsEditing(true);
   };
 
-  const handleFormat = (prefix: string, suffix: string) => {
-    const { start, end } = selection;
-    setContent(
-      content.substring(0, start) +
-        prefix +
-        content.substring(start, end) +
-        suffix +
-        content.substring(end)
-    );
+  const handleChange = (html: string) => {
+    try {
+      setContent(converter.convert(html));
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   return (
@@ -144,8 +163,9 @@ export const Editor = ({
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? autoPlacement : "padding"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? autoPlacement : 40}
+        behavior={Platform.OS === "ios" ? autoPlacement : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? autoPlacement : 0}
+        key={keyboardAvoidingViewKey}
       >
         {isEditing ? (
           <ScrollView
@@ -173,44 +193,35 @@ export const Editor = ({
                   onChangeText={setTag}
                 />
               </View>
-
-              <TextInput
-                style={styles.textArea}
-                multiline
-                placeholder="Digite aqui..."
-                placeholderTextColor={colors.placeholder}
-                value={content}
-                onChangeText={setContent}
-                onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
-                autoFocus
-              />
-            </View>
-
-            <View style={[styles.toolbar, { marginTop: 16 }]}>
-              <ScrollView
-                horizontal
-                contentContainerStyle={styles.toolbarContent}
-                keyboardShouldPersistTaps="always"
-                showsHorizontalScrollIndicator={false}
-              >
-                {["**", "*", "# ", "## ", "\n- ", "`"].map((sym, i) => (
-                  <TouchableOpacity
-                    key={i}
-                    style={styles.toolBtn}
-                    onPress={() => {
-                      performHaptic();
-                      handleFormat(
-                        sym,
-                        sym.trim() === "**" || sym.trim() === "*" || sym.trim() === "`" ? sym : ""
-                      );
-                    }}
-                  >
-                    <Text style={styles.toolBtnText}>{["B", "I", "H1", "H2", "List", "Code"][i]}</Text>
-                  </TouchableOpacity>
-                ))}
+              <RichEditor
+                  ref={editorRef}
+                  initialContentHTML={content}
+                  editorStyle={editorStyle}
+                  useContainer={false}
+                  onChange={handleChange}
+                />
+                </View>
+                <RichToolbar
+                  editor={editorRef}  
+                  selectedButtonStyle={styles.toolBtn}
+                  unselectedButtonStyle={styles.unselectedToolBtn}
+                  actions={[
+                    actions.setBold,
+                    actions.setItalic,
+                    actions.setUnderline,
+                    actions.setStrikethrough,
+                    actions.insertBulletsList,
+                    actions.insertOrderedList,
+                    actions.checkboxList,
+                    actions.removeFormat,
+                    actions.undo,
+                    actions.redo,
+                  ]}
+                  style={{
+                    backgroundColor: colors.bg
+                  }}
+                />
               </ScrollView>
-            </View>
-          </ScrollView>
         ) : (
           <View style={{ flex: 1 }}>
             <ScrollView style={styles.previewPane} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -246,3 +257,80 @@ export const Editor = ({
     </View>
   );
 };
+
+// import React, { useRef, useState } from 'react';
+// import { SafeAreaView , SafeAreaProvider } from 'react-native-safe-area-context';
+// import { Dimensions, KeyboardAvoidingView, Platform, StyleSheet, useColorScheme } from 'react-native';
+// import { RichEditor, RichEditorProps, RichToolbar } from 'react-native-pell-rich-editor';
+// import { useTheme, View } from 'tamagui';
+
+// const screenHeight = Dimensions.get('window').height;
+// const screenWidth = Dimensions.get('window').width;
+
+// export default function Editor () {
+
+//   const colorScheme = useColorScheme();
+//   const theme = useTheme();
+
+//   const [content, setContent] = useState('');    
+//   const [inputHeight, setInputHeight] = useState(40);
+
+//   const editorRef = useRef<RichEditor>(null);
+
+//   const styles = StyleSheet.create(
+//   {
+//     textEditor: {
+//       flex: 1
+//     },
+//     selectedButton: {
+//       borderColor: '#2273f5',
+//       borderRadius: 12,
+//       borderWidth: 2,
+//       borderStyle: 'solid'
+//     },
+//     toolbar: {
+//       backgroundColor: colorScheme === 'dark' ? 'white' : 'black'
+//     },
+//     selectedIcon: {
+//       color: colorScheme === 'dark' ? 'white' : 'black'
+//     },
+//     unselectedIcon: {
+//       color: colorScheme === 'dark' ? 'white' : 'black'
+//     },
+//     editorWrapper: {
+//       borderWidth: 2,
+//       minHeight: 100,
+//       height: 570,
+//       minWidth: screenWidth,
+//     }
+//   })
+
+//   return (
+//         <SafeAreaProvider>
+//             <SafeAreaView>
+//               <KeyboardAvoidingView
+//                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.textEditor}
+//               >
+//                 <View
+//                   style={styles.editorWrapper}
+//                 >
+//                   <RichEditor
+//                     ref={editorRef}
+//                     initialContentHTML=''
+//                     editorStyle={{
+//                       backgroundColor: colorScheme === 'dark' ? 'black' : 'white',
+//                       caretColor: colorScheme === 'dark' ? 'white' : 'black',
+//                       color: colorScheme === 'dark' ? 'white' : 'black',
+//                     }}
+//                     useContainer={false}
+//                   />
+//                 </View>
+//                 <RichToolbar
+//                   editor={editorRef}  
+//                   selectedButtonStyle={styles.selectedButton}
+//                 />
+//               </KeyboardAvoidingView>
+//             </SafeAreaView>
+//         </SafeAreaProvider>
+//   );
+// };
