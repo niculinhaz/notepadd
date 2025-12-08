@@ -1,25 +1,23 @@
-import React, { useState, useCallback } from 'react';
-import { 
-  View as RNView,  
-  TouchableOpacity,
-  FlatList, 
+import { Feather } from '@expo/vector-icons';
+import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useState } from 'react';
+import {
+  FlatList,
+  Image,
   TextInput,
-  View,
-  Image
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Feather } from '@expo/vector-icons';
-import { useFocusEffect, router } from 'expo-router';
 
 import { Text } from '@/components/ui/StyledText';
+import { getAllNotes } from '@/database/database';
+import { Note } from '@/type';
+import { useSQLiteContext } from 'expo-sqlite';
+import { FilterDrawer } from '../../components/ui/filter-drawer';
+import { NoteCard } from '../../components/ui/note-card';
 import { useThemeStyles } from '../../constants/theme';
 import { useThemeContext } from '../_layout';
-import { NoteCard } from '../../components/ui/note-card';
-import { FilterDrawer } from '../../components/ui/filter-drawer';
-import { Note } from '../../types/index';
-
-const STORAGE_KEY = '@my_notes_app_final_v3';
 
 export default function NotesScreen() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -27,7 +25,8 @@ export default function NotesScreen() {
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedTag, setSelectedTag] = useState('Todas as notas');
-
+  
+  const db = useSQLiteContext();
   const { isDarkMode, toggleTheme } = useThemeContext();
   const styles = useThemeStyles(isDarkMode);
 
@@ -39,9 +38,14 @@ export default function NotesScreen() {
 
   const loadNotes = async () => {
     try {
-      const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-      if (jsonValue) setNotes(JSON.parse(jsonValue));
-    } catch (e) { console.error(e); }
+      const fetchedNotes = await getAllNotes(db);
+      console.log(fetchedNotes);
+      if (fetchedNotes.length > 0) 
+        setNotes(fetchedNotes);
+    } 
+    catch (e) { 
+      console.error(e); 
+    }
   };
 
   const getTagsWithCounts = () => {
@@ -146,7 +150,7 @@ export default function NotesScreen() {
             lineHeight: 28,
             fontWeight: '500'
           }}>
-            você não criou{'\n'}nenhuma nota ainda :(
+            você não criou{'\n'}nenhuma nota ainda :
           </Text>
         </View>
       ) : (

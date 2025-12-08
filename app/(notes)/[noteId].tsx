@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, View, TouchableOpacity, Dimensions } from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from '@/components/ui/StyledText';
+import * as Crypto from 'expo-crypto';
+import { router, useLocalSearchParams } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, Modal, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useThemeContext } from '../_layout';
-import { useThemeStyles } from '../../constants/theme';
+import { deleteNoteById, getNoteById, insertNote, updateNote } from '@/database/database';
 import { Editor } from '../../components/ui/editor';
-import { Note } from '../../types';
+import { useThemeStyles } from '../../constants/theme';
+import { useThemeContext } from '../_layout';
 
-const STORAGE_KEY = '@my_notes_app_final_v3';
 const { width } = Dimensions.get('window');
 
 export default function NoteDetailScreen() {
@@ -24,7 +24,6 @@ export default function NoteDetailScreen() {
   const globalStyles = useThemeStyles(isDarkMode);
 
   // Estados da Nota
-  const [notes, setNotes] = useState<Note[]>([]);
   const [title, setTitle] = useState('');
   const [tag, setTag] = useState('');
   const [content, setContent] = useState('');
@@ -33,22 +32,20 @@ export default function NoteDetailScreen() {
   // Estado para controlar o Modal de Exclusão
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  const db = useSQLiteContext();
+
   useEffect(() => {
     loadNoteData();
   }, [currentNoteId]);
 
   const loadNoteData = async () => {
     try {
-      const jsonValue = await AsyncStorage.getItem(STORAGE_KEY);
-      let loadedNotes: Note[] = jsonValue ? JSON.parse(jsonValue) : [];
-      setNotes(loadedNotes);
-
       if (!isNew) {
-        const found = loadedNotes.find(n => n.id === currentNoteId);
-        if (found) {
-          setTitle(found.title);
-          setTag(found.tag);
-          setContent(found.content);
+        const note = await getNoteById(db, currentNoteId);
+        if (note) {
+          setTitle(note.title);
+          setTag(note.tag);
+          setContent(note.content);
           setIsEditing(false);
         }
       }
@@ -61,18 +58,27 @@ export default function NoteDetailScreen() {
       return;
     }
     
-    const now = new Date().toLocaleDateString('pt-BR');
-    let updated = [...notes];
-    const noteData = { title: title || 'Sem Título', tag, content, date: now };
+    const noteData = {
+      title: title || 'Sem Título', 
+      tag, 
+      content, 
+      date: new Date().toLocaleDateString('pt-BR')
+    };
 
     if (!isNew) {
-      updated = updated.map(n => n.id === currentNoteId ? { ...n, ...noteData } : n);
-    } else {
-      updated.unshift({ id: Date.now().toString(), ...noteData });
+      await updateNote(db, {
+        id: currentNoteId,
+        ...noteData
+      });
+    } 
+    else {
+      await insertNote(db, {
+        id: Crypto.randomUUID(),
+        ...noteData
+      });
     }
 
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-    router.back();
+    //router.back();
   };
 
   // Abre o nosso modal customizado em vez do Alert nativo
@@ -83,11 +89,11 @@ export default function NoteDetailScreen() {
   // Função que realmente apaga (chamada pelo "Sim" do modal)
   const confirmDelete = async () => {
     try {
-      const updated = notes.filter(n => n.id !== currentNoteId);
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      await deleteNoteById(db, currentNoteId);
       setShowDeleteModal(false);
       router.back();
-    } catch (error) {
+    } 
+    catch (error) {
       console.error("Erro ao excluir nota:", error);
     }
   };
@@ -114,6 +120,7 @@ export default function NoteDetailScreen() {
         isEditing={isEditing} setIsEditing={setIsEditing}
         onSave={handleSave}
         onDelete={handleDelete}
+        onExit={() => router.back()}
       />
 
       {/* --- MODAL CUSTOMIZADO DE EXCLUSÃO --- */}
@@ -211,7 +218,6 @@ export default function NoteDetailScreen() {
           </View>
         </View>
       </Modal>
-
     </SafeAreaView>
   );
 }
