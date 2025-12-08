@@ -4,7 +4,8 @@ import {
   TouchableOpacity,
   FlatList, 
   TextInput,
-  View
+  View,
+  Image
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -96,8 +97,16 @@ export default function NotesScreen() {
         <TouchableOpacity onPress={() => setIsDrawerOpen(true)} style={styles.menuBtn}>
            <Feather name="menu" size={28} color={iconColor} />
         </TouchableOpacity>
-        <Text style={styles.appLogo}>notepadd</Text>
-        <View style={{width: 28}} /> 
+        <View style={{ flex: 1, alignItems: 'flex-end'}}>
+        <Image 
+          source={isDarkMode 
+            ? require('../../assets/images/notepaddlogo.png')
+            : require('../../assets/images/notepaddlogolight.png')
+          } 
+          style={{ width: 160, height: 40 }}
+          resizeMode="contain"
+        />
+        </View> 
       </View>
 
       <View style={styles.searchSection}>
