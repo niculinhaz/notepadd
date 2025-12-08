@@ -247,7 +247,6 @@ export const Editor = ({
                     actions.setStrikethrough,
                     actions.insertBulletsList,
                     actions.insertOrderedList,
-                    actions.checkboxList,
                     actions.removeFormat,
                     actions.undo,
                     actions.redo,
