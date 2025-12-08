@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet, useColorScheme } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -142,6 +142,7 @@ const createStyles = (isDark: boolean) => {
     headerButtons: { flexDirection: 'row', gap: 10 },
     
     editorPane: { flex: 1, padding: 20, backgroundColor: c.bg },
+  
     inputsContainer: { marginBottom: 20, gap: 15 },
 
     inputTitle: {
@@ -163,8 +164,12 @@ const createStyles = (isDark: boolean) => {
     },
     toolbarContent: { alignItems: 'center', paddingHorizontal: 10, gap: 12 },
     toolBtn: { 
-      backgroundColor: c.tint, paddingVertical: 8, paddingHorizontal: 16,
-      borderRadius: 6, minWidth: 45, alignItems: 'center', justifyContent: 'center',
+      backgroundColor: c.tint, paddingVertical: 8, paddingHorizontal: 24,
+      minWidth: Math.ceil(width / 10), alignItems: 'center', justifyContent: 'center',
+    },
+    unselectedToolBtn: {
+      backgroundColor: c.bg, paddingVertical: 8, paddingHorizontal: 24,
+      minWidth: Math.ceil(width / 10), alignItems: 'center', justifyContent: 'center',
     },
     toolBtnText: { color: isDark ? '#000' : '#fff', fontWeight: 'bold', fontSize: 14, fontFamily: 'SF-Pro-Bold', },
     
@@ -192,5 +197,17 @@ export const markdownStylesGen = (isDark: boolean) => ({
   list_item: { marginVertical: 4 },
   code_inline: { backgroundColor: isDark ? '#333' : '#e9ecef', color: isDark ? '#ffcc00' : '#d63384', padding: 4, borderRadius: 4, fontFamily: 'SF-Pro', },
 });
+
+  const isDark = useColorScheme() === 'dark';
+
+  export const editorStyle = {
+    backgroundColor: isDark ? darkColors.cardBg : lightColors.cardBg,
+    caretColor: isDark ? darkColors.tint : lightColors.tint,
+    color: isDark ? darkColors.text : lightColors.text,
+    cssText: `
+      border-radius: 12px,
+      border: 1px solid #333
+    `
+  }
 
 export const markdownStyles = markdownStylesGen(true);

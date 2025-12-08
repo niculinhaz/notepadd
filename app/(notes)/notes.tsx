@@ -78,7 +78,6 @@ export default function NotesScreen() {
   const filteredNotes = getFilteredNotes();
   const iconColor = isDarkMode ? '#fff' : '#000';
   const iconSecColor = isDarkMode ? '#666' : '#888';
-  
   const placeholderColor = isDarkMode ? '#555' : '#aaa';
 
   return (
@@ -113,6 +112,7 @@ export default function NotesScreen() {
       <View style={styles.searchSection}>
         <View style={styles.searchBarContainer}>
           <Feather name="search" size={20} color={iconSecColor} />
+          
           <TextInput 
             style={[styles.searchInput, { fontFamily: 'SF-Pro' }]} 
             placeholder="pesquisar" 
@@ -120,6 +120,12 @@ export default function NotesScreen() {
             value={searchText} 
             onChangeText={setSearchText} 
           />
+
+          {searchText.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchText('')} hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}>
+              <Feather name="x" size={20} color={iconSecColor} />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
