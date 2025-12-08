@@ -12,14 +12,19 @@ import {
 
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { marked } from 'marked';
 import Markdown from "react-native-markdown-display";
 import { actions, RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 
 import { autoPlacement } from "@floating-ui/core";
 import { useThemeContext } from "../../app/_layout";
-import { editorStyle, markdownStylesGen, useThemeStyles } from "../../constants/theme";
+import { markdownStylesGen, useThemeStyles } from "../../constants/theme";
 
 const converter = require('@vimeiro-co/react-native-html-to-markdown');
+converter.use(function (html: string) {
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+})
 
 interface Props {
   title: string;
@@ -129,7 +134,14 @@ export const Editor = ({
     }
   };
 
-  
+  const parseHtml = (markdown: string) => {
+    try {
+      marked.setOptions({async: false});
+      return marked.parse(markdown) as string;
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -218,7 +230,7 @@ export const Editor = ({
               </View>
               <RichEditor
                   ref={editorRef}
-                  initialContentHTML={content}
+                  initialContentHTML={parseHtml(content)}
                   editorStyle={dynamicEditorStyle}
                   useContainer={false}
                   placeholder="Digite aqui..."
@@ -232,7 +244,6 @@ export const Editor = ({
                   actions={[
                     actions.setBold,
                     actions.setItalic,
-                    actions.setUnderline,
                     actions.setStrikethrough,
                     actions.insertBulletsList,
                     actions.insertOrderedList,

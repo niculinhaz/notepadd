@@ -1,11 +1,13 @@
+import { Text } from '@/components/ui/StyledText';
+import { underlineRule } from '@/rules/underlineRule';
+import { Note } from '@/type';
+import { Feather } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
-import { Text } from '@/components/ui/StyledText';
-import { useThemeStyles } from '../../constants/theme';
+import Markdown from 'react-native-markdown-display';
 import { useThemeContext } from '../../app/_layout';
-import { router } from 'expo-router'; 
-import { Note } from '@/type'; 
-import { Feather } from '@expo/vector-icons';
+import { cardMarkdownStyles, useThemeStyles } from '../../constants/theme';
 
 interface Props {
   item: Note;
@@ -19,8 +21,6 @@ export const NoteCard = ({ item, isSelectionMode, isSelected, onSelect, onLongPr
   const { isDarkMode } = useThemeContext();
   const styles = useThemeStyles(isDarkMode);
   
-  const cleanContent = item.content ? item.content.replace(/[#*`\[\]-]/g, '').trim() : '';
-
   const checkboxUnselectedColor = isDarkMode ? '#ccc' : '#888';
   const checkboxSelectedColor = isDarkMode ? '#61dafb' : '#007acc';
 
@@ -60,9 +60,11 @@ export const NoteCard = ({ item, isSelectionMode, isSelected, onSelect, onLongPr
         </View>
       )}
 
-      <Text style={styles.noteCardPreview} numberOfLines={6} ellipsizeMode="tail">
-        {cleanContent || 'Sem conteúdo...'}
-      </Text>
+      <View style={{maxHeight: 110}}>
+        <Markdown style={cardMarkdownStyles(isDarkMode)} numberOfLines={6} ellipsizeMode="tail" rules={{...underlineRule}}>
+          {item.content || 'Sem conteúdo...'}
+        </Markdown>
+      </View>
 
       <View style={styles.cardFooterContainer}>
         <Text 

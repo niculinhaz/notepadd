@@ -56,6 +56,8 @@ export default function NoteDetailScreen() {
       return;
     }
     
+    console.log(content);
+
     const noteData = {
       title: title || 'Sem Título', 
       tag, 

@@ -226,7 +226,16 @@ export const markdownStylesGen = (isDark: boolean) => ({
   code_inline: { backgroundColor: isDark ? '#333' : '#e9ecef', color: isDark ? '#ffcc00' : '#d63384', padding: 4, borderRadius: 4, fontFamily: 'SF-Pro', },
 });
 
-  const isDark = useColorScheme() === 'dark';
+export const cardMarkdownStyles  = (isDark: boolean) => ({
+  body: { color: isDark ? '#e0e0e0' : '#333', fontSize: 12, lineHeight: 28, fontFamily: 'SF-Pro', },
+  heading1: { color: isDark ? '#fff' : '#000', fontSize: 16, fontWeight: '700', marginVertical: 10, fontFamily: 'SF-Pro', },
+  heading2: { color: isDark ? '#fff' : '#000', fontSize: 14, fontWeight: '700', marginVertical: 8, fontFamily: 'SF-Pro', },
+  strong: { color: isDark ? '#fff' : '#000', fontWeight: '700', fontFamily: 'SF-Pro', },
+  list_item: { marginVertical: 2 },
+  code_inline: { backgroundColor: isDark ? '#333' : '#e9ecef', color: isDark ? '#ffcc00' : '#d63384', padding: 4, borderRadius: 4, fontFamily: 'SF-Pro', },
+});
+
+const isDark = useColorScheme() === 'dark';
 
 export const editorStyle = {
     backgroundColor: isDark ? darkColors.cardBg : lightColors.cardBg,
