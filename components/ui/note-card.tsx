@@ -1,5 +1,4 @@
 import { Text } from '@/components/ui/StyledText';
-import { underlineRule } from '@/rules/underlineRule';
 import { Note } from '@/type';
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -61,7 +60,7 @@ export const NoteCard = ({ item, isSelectionMode, isSelected, onSelect, onLongPr
       )}
 
       <View style={{maxHeight: 110}}>
-        <Markdown style={cardMarkdownStyles(isDarkMode)} numberOfLines={6} ellipsizeMode="tail" rules={{...underlineRule}}>
+        <Markdown style={cardMarkdownStyles(isDarkMode)} numberOfLines={6} ellipsizeMode="tail">
           {item.content || 'Sem conteúdo...'}
         </Markdown>
       </View>
