@@ -15,6 +15,7 @@ import { Feather } from "@expo/vector-icons";
 
 import { useThemeStyles, markdownStylesGen } from "../../constants/theme";
 import { useThemeContext } from "../../app/_layout";
+import { autoPlacement } from "@floating-ui/core";
 
 interface Props {
   title: string;
@@ -93,7 +94,7 @@ export const Editor = ({
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <View
         style={{
-          paddingTop: 32,
+          paddingTop: 2,
           paddingLeft: 8,
           paddingRight: 20,
           paddingBottom: 12,
@@ -143,8 +144,8 @@ export const Editor = ({
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 5 : 0}
+        behavior={Platform.OS === "ios" ? autoPlacement : "padding"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? autoPlacement : 40}
       >
         {isEditing ? (
           <ScrollView
