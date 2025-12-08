@@ -15,38 +15,36 @@ const { width } = Dimensions.get('window');
 
 export default function NoteDetailScreen() {
   const { noteId } = useLocalSearchParams();
-  // Garante que noteId é uma string
-  const currentNoteId = Array.isArray(noteId) ? noteId[0] : noteId;
-  const isNew = currentNoteId === 'new';
+  
+  const initialId = Array.isArray(noteId) ? noteId[0] : noteId;
+  const [currentId, setCurrentId] = useState(initialId);
+  
+  const isNew = currentId === 'new';
 
-  // --- Hooks de Tema ---
   const { isDarkMode } = useThemeContext();
   const globalStyles = useThemeStyles(isDarkMode);
 
-  // Estados da Nota
   const [title, setTitle] = useState('');
   const [tag, setTag] = useState('');
   const [content, setContent] = useState('');
   const [isEditing, setIsEditing] = useState(isNew);
 
-  // Estado para controlar o Modal de Exclusão
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const db = useSQLiteContext();
 
   useEffect(() => {
     loadNoteData();
-  }, [currentNoteId]);
+  }, [currentId]);
 
   const loadNoteData = async () => {
     try {
       if (!isNew) {
-        const note = await getNoteById(db, currentNoteId);
+        const note = await getNoteById(db, currentId);
         if (note) {
           setTitle(note.title);
           setTag(note.tag);
           setContent(note.content);
-          setIsEditing(false);
         }
       }
     } catch (e) { console.error(e); }
@@ -67,29 +65,29 @@ export default function NoteDetailScreen() {
 
     if (!isNew) {
       await updateNote(db, {
-        id: currentNoteId,
+        id: currentId,
         ...noteData
       });
     } 
     else {
+      const newId = Crypto.randomUUID();
+      
       await insertNote(db, {
-        id: Crypto.randomUUID(),
+        id: newId,
         ...noteData
       });
+      
+      setCurrentId(newId);
     }
-
-    //router.back();
   };
 
-  // Abre o nosso modal customizado em vez do Alert nativo
   const handleDelete = () => {
     setShowDeleteModal(true);
   };
 
-  // Função que realmente apaga (chamada pelo "Sim" do modal)
   const confirmDelete = async () => {
     try {
-      await deleteNoteById(db, currentNoteId);
+      await deleteNoteById(db, currentId);
       setShowDeleteModal(false);
       router.back();
     } 
@@ -98,7 +96,6 @@ export default function NoteDetailScreen() {
     }
   };
 
-  // --- Cores locais para o Modal (baseadas no tema) ---
   const modalColors = {
     overlay: 'rgba(0,0,0,0.7)',
     bg: isDarkMode ? '#1e1e1e' : '#ffffff',
@@ -107,7 +104,7 @@ export default function NoteDetailScreen() {
     border: isDarkMode ? '#333' : '#e0e0e0',
     cancelBtn: isDarkMode ? '#333' : '#f0f0f0',
     cancelText: isDarkMode ? '#fff' : '#000',
-    deleteBtn: '#cf6679', // Vermelho suave
+    deleteBtn: '#cf6679', 
     deleteText: '#fff'
   };
 
@@ -123,7 +120,6 @@ export default function NoteDetailScreen() {
         onExit={() => router.back()}
       />
 
-      {/* --- MODAL CUSTOMIZADO DE EXCLUSÃO --- */}
       <Modal
         visible={showDeleteModal}
         transparent={true}
@@ -137,7 +133,6 @@ export default function NoteDetailScreen() {
           alignItems: 'center',
           padding: 20
         }}>
-          {/* Caixa do Alerta */}
           <View style={{
             width: width * 0.85,
             backgroundColor: modalColors.bg,
@@ -171,10 +166,7 @@ export default function NoteDetailScreen() {
               Tem certeza que deseja apagar esta nota permanentemente?
             </Text>
 
-            {/* Botões */}
             <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 12 }}>
-              
-              {/* Botão Cancelar */}
               <TouchableOpacity 
                 onPress={() => setShowDeleteModal(false)}
                 style={{
@@ -194,7 +186,6 @@ export default function NoteDetailScreen() {
                 </Text>
               </TouchableOpacity>
 
-              {/* Botão Excluir */}
               <TouchableOpacity 
                 onPress={confirmDelete}
                 style={{
@@ -213,7 +204,6 @@ export default function NoteDetailScreen() {
                   Excluir
                 </Text>
               </TouchableOpacity>
-
             </View>
           </View>
         </View>
