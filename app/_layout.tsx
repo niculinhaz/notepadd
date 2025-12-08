@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { createTamagui, TamaguiProvider } from 'tamagui';
 import { defaultConfig } from '@tamagui/config/v4';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SystemUI from 'expo-system-ui';
 
 const config = createTamagui(defaultConfig);
 
@@ -32,7 +33,6 @@ export default function RootLayout() {
     'SF-Pro': require('../assets/fonts/SF-Pro.ttf'),
   });
 
-
   const [theme, setTheme] = useState<ThemeType>('dark');
 
   useEffect(() => {
@@ -55,27 +55,42 @@ export default function RootLayout() {
     await AsyncStorage.setItem('@app_theme', newTheme);
   };
 
+  const isDarkMode = theme === 'dark';
+  const backgroundColor = isDarkMode ? '#050505' : '#f8f9fa';
+
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync(backgroundColor);
+  }, [backgroundColor]);
+
   if (!fontsLoaded) {
     return null;
   }
-
-  const isDarkMode = theme === 'dark';
 
   return (
     <ThemeContext.Provider value={{ theme, isDarkMode, toggleTheme }}>
       <TamaguiProvider config={config} defaultTheme={theme}>
         <StatusBar 
           barStyle={isDarkMode ? "light-content" : "dark-content"} 
-          backgroundColor={isDarkMode ? "#050505" : "#f8f9fa"} 
+          backgroundColor={backgroundColor} 
         />
         <Stack 
           screenOptions={{ 
             headerShown: false, 
-            contentStyle: { backgroundColor: isDarkMode ? '#050505' : '#f8f9fa' } 
+            contentStyle: { backgroundColor: backgroundColor },
+            animation: 'slide_from_right',
           }}
         >
+          {/* Tela Inicial */}
           <Stack.Screen name="(notes)/notes" />
-          <Stack.Screen name="(notes)/[noteId]" />
+
+          {/* Tela da Nota */}
+          <Stack.Screen 
+            name="(notes)/[noteId]" 
+            options={{ 
+              presentation: 'card',
+              gestureEnabled: true,
+            }} 
+          />
         </Stack>
       </TamaguiProvider>
     </ThemeContext.Provider>

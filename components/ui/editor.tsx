@@ -94,7 +94,7 @@ export const Editor = ({
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <View
         style={{
-          paddingTop: 2,
+          paddingTop: 20,
           paddingLeft: 8,
           paddingRight: 20,
           paddingBottom: 12,
@@ -116,6 +116,7 @@ export const Editor = ({
                 color: colors.text,
                 marginLeft: 4,
                 lineHeight: 22,
+                fontWeight: "",
               }}
             >
               Voltar
@@ -145,7 +146,7 @@ export const Editor = ({
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? autoPlacement : "padding"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? autoPlacement : 40}
+        keyboardVerticalOffset={Platform.OS === "ios" ? autoPlacement : 0}
       >
         {isEditing ? (
           <ScrollView
@@ -233,7 +234,7 @@ export const Editor = ({
                       fontSize: 18, 
                       marginTop: 10,
                   }}>
-                    Pressione para começar a digitar
+                    Pressione para começar a digitar...
                   </Text>
                 ) : (
                    <Markdown style={markdownStyles}>{content}</Markdown>
