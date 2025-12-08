@@ -211,7 +211,7 @@ export default function NotesScreen() {
             lineHeight: 28,
             fontWeight: '500'
           }}>
-            você não criou{'\n'}nenhuma nota ainda :
+            você não criou{'\n'}nenhuma nota ainda :(
           </Text>
         </View>
       ) : (
