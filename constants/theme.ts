@@ -231,7 +231,7 @@ export const cardMarkdownStyles  = (isDark: boolean) => ({
   heading1: { color: isDark ? '#fff' : '#000', fontSize: 16, fontWeight: '700', marginVertical: 10, fontFamily: 'SF-Pro', },
   heading2: { color: isDark ? '#fff' : '#000', fontSize: 14, fontWeight: '700', marginVertical: 8, fontFamily: 'SF-Pro', },
   strong: { color: isDark ? '#fff' : '#000', fontWeight: '700', fontFamily: 'SF-Pro', },
-  list_item: { marginVertical: 4 },
+  list_item: { marginVertical: 4, fontFamily: 'SF-Pro' },
   code_inline: { backgroundColor: isDark ? '#333' : '#e9ecef', color: isDark ? '#ffcc00' : '#d63384', padding: 4, borderRadius: 4, fontFamily: 'SF-Pro', },
 });
 

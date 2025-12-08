@@ -59,7 +59,7 @@ export const NoteCard = ({ item, isSelectionMode, isSelected, onSelect, onLongPr
         </View>
       )}
 
-      <View style={{maxHeight: 110}}>
+      <View style={{minHeight: 110, maxHeight: 110, overflow: 'hidden'}}>
         <Markdown style={cardMarkdownStyles(isDarkMode)} numberOfLines={6} ellipsizeMode="tail">
           {item.content || 'Sem conteúdo...'}
         </Markdown>
