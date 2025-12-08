@@ -32,6 +32,7 @@ interface Props {
   setIsEditing: (b: boolean) => void;
   onSave: () => void;
   onDelete: () => void;
+  onExit: () => void;
 }
 
 export const Editor = ({
@@ -45,6 +46,7 @@ export const Editor = ({
   setIsEditing,
   onSave,
   onDelete,
+  onExit
 }: Props) => {
   const editorRef = useRef<RichEditor>(null);
   
@@ -87,13 +89,14 @@ export const Editor = ({
 
   const save = () => {
     performHaptic();
+    onSave();
     setIsEditing(false);
   };
 
   const handleExit = () => {
     performHaptic();
-    onSave();
     setIsEditing(false);
+    onExit();
   };
 
   const toggleToEdit = () => {
@@ -135,7 +138,7 @@ export const Editor = ({
                 color: colors.text,
                 marginLeft: 4,
                 lineHeight: 22,
-                fontWeight: "",
+                fontWeight: undefined,
               }}
             >
               Voltar
