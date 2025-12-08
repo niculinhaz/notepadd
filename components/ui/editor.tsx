@@ -58,6 +58,7 @@ export const Editor = ({
   
   const colors = {
     bg: isDarkMode ? "#050505" : "#f8f9fa",
+    editorBox: isDarkMode ? "#1a1a1a" : "#ffffffff",
     text: isDarkMode ? "#fff" : "#000",
     border: isDarkMode ? "#222" : "#e0e0e0",
     icon: isDarkMode ? "#fff" : "#000",
@@ -65,6 +66,22 @@ export const Editor = ({
     okBtn: isDarkMode ? "rgba(99, 175, 226, 1)" : "#007acc",
     deleteBtn: "#cf6679"
   };
+
+  const dynamicEditorStyle = {
+    backgroundColor: colors.editorBox,
+    color: colors.text,
+    placeholderColor: colors.placeholder,
+    contentCSSText: `
+      body { 
+        color: ${colors.text}; 
+        background-color: ${colors.bg}; 
+        font-family: -apple-system, system-ui, sans-serif;
+        padding: 0 10px;
+      }
+      * { color: ${colors.text}; }
+    `,
+  };
+
 
   const keyboardHideListenerCallback = useCallback(() => {
     setKeyboardAvoidingViewKey(
@@ -111,6 +128,8 @@ export const Editor = ({
       console.error(e);
     }
   };
+
+  
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -200,8 +219,9 @@ export const Editor = ({
               <RichEditor
                   ref={editorRef}
                   initialContentHTML={content}
-                  editorStyle={editorStyle}
+                  editorStyle={dynamicEditorStyle}
                   useContainer={false}
+                  placeholder="Digite aqui..."
                   onChange={handleChange}
                 />
                 </View>
