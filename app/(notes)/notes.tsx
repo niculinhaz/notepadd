@@ -1,10 +1,18 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { 
+  View as RNView,  
+  TouchableOpacity,
+  useWindowDimensions,
+  FlatList, 
+  TextInput,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 import { useFocusEffect, router } from 'expo-router';
 
+import { Text, H1 } from '@/components/ui/StyledText'; // importa o StyledText
+import { View, useTheme } from "@tamagui/core";
 import { styles } from '../../constants/theme';
 import { NoteCard } from '../../components/ui/note-card';
 import { FilterDrawer } from '../../components/ui/filter-drawer';
