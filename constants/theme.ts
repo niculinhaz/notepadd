@@ -1,4 +1,4 @@
-import { StyleSheet, Platform, Dimensions } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -37,7 +37,6 @@ const createStyles = (isDark: boolean) => {
     container: {
       flex: 1,
       backgroundColor: c.bg,
-      paddingTop: Platform.OS === 'android' ? 40 : 0,
     },
     
     headerTop: {
