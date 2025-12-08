@@ -31,6 +31,7 @@ export const useThemeContext = () => useContext(ThemeContext);
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     'SF-Pro': require('../assets/fonts/SF-Pro.ttf'),
+    'SF-Pro-Bold': require('../assets/fonts/SF-Pro-Display-Bold.otf'), //usar sf pro bold ao invés de font weight bold
   });
 
   const [theme, setTheme] = useState<ThemeType>('dark');

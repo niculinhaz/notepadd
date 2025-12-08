@@ -3,14 +3,14 @@ import {
   Modal, 
   TouchableOpacity, 
   TouchableWithoutFeedback, 
-  View, 
-  Text, 
+  View,  
   ScrollView, 
   Animated, 
   Dimensions 
 } from 'react-native';
 import { Feather } from "@expo/vector-icons";
 import { useThemeStyles } from '../../constants/theme';
+import { Text } from '@/components/ui/StyledText';
 
 interface TagCount {
   name: string;

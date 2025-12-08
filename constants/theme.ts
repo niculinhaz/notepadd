@@ -37,6 +37,7 @@ const createStyles = (isDark: boolean) => {
     container: {
       flex: 1,
       backgroundColor: c.bg,
+      fontFamily: 'SF-Pro',
     },
     
     headerTop: {
@@ -51,7 +52,12 @@ const createStyles = (isDark: boolean) => {
       flexDirection: 'row', alignItems: 'center', backgroundColor: c.searchBg,
       borderRadius: 12, paddingHorizontal: 15, height: 50,
     },
-    searchInput: { flex: 1, color: c.text, fontSize: 16, marginLeft: 10 },
+    searchInput: { 
+      flex: 1, 
+      color: c.text, 
+      fontSize: 16, 
+      marginLeft: 10, 
+      fontFamily: 'SF-Pro', },
 
     modalOverlay: { 
       flex: 1, 
@@ -63,21 +69,21 @@ const createStyles = (isDark: boolean) => {
       padding: 20, borderRightWidth: 1, borderRightColor: c.cardBorder,
     },
     drawerHeader: { 
-      fontSize: 24, fontWeight: 'bold', color: c.text, marginBottom: 30, marginTop: 20 
+      fontSize: 24, color: c.text, marginBottom: 30, marginTop: 20, fontFamily: 'SF-Pro-Bold', 
     },
     drawerItem: {
       flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 15,
       borderBottomWidth: 1, borderBottomColor: c.divider,
     },
-    drawerItemText: { fontSize: 16, color: c.textMuted, fontWeight: '500' },
-    drawerItemTextSelected: { color: c.text, fontWeight: 'bold' },
-    drawerCount: { color: c.textMuted, fontSize: 14 },
+    drawerItemText: { fontSize: 16, color: c.textMuted, fontWeight: '500', fontFamily: 'SF-Pro' },
+    drawerItemTextSelected: { color: c.text, fontFamily: 'SF-Pro-Bold', },
+    drawerCount: { color: c.textMuted, fontSize: 14, fontFamily: 'SF-Pro' },
 
     infoRow: {
       flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
       paddingHorizontal: 25, marginBottom: 10,
     },
-    infoText: { color: c.text, fontSize: 14, fontWeight: '600' },
+    infoText: { color: c.text, fontSize: 14, fontWeight: '600', fontFamily: 'SF-Pro-Bold',},
     sortButton: { flexDirection: 'row', alignItems: 'center', gap: 5 },
     sortText: { color: c.textMuted, fontSize: 12 },
 
@@ -93,30 +99,46 @@ const createStyles = (isDark: boolean) => {
       borderColor: c.cardBorder,
       minHeight: 180,
       flexDirection: 'column',
+      fontFamily: 'SF-Pro',
     },
+
     noteCardPreview: { 
-      color: c.textSec, fontSize: 13, lineHeight: 18, flex: 1, marginBottom: 12, 
+      color: c.textSec, 
+      fontSize: 13, 
+      lineHeight: 18, 
+      flex: 1, 
+      marginBottom: 12, 
+      fontFamily: 'SF-Pro',
     },
+
     cardFooterContainer: { justifyContent: 'flex-end' },
+
     cardTitleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4, gap: 8 },
-    noteCardTitle: { color: c.text, fontSize: 15, fontWeight: 'bold', flex: 1 },
+
+    noteCardTitle: { 
+      color: c.text, 
+      fontSize: 15,  
+      flex: 1,
+      fontFamily: 'SF-Pro-Bold',
+    },
+
     miniTagBadge: { backgroundColor: isDark ? 'rgba(97, 218, 251, 0.15)' : 'rgba(0, 122, 204, 0.1)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
-    miniTagText: { color: c.tint, fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase' },
-    noteDate: { color: c.textMuted, fontSize: 11 },
+    miniTagText: { color: c.tint, fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', fontFamily: 'SF-Pro-Bold', },
+    noteDate: { color: c.textMuted, fontSize: 11, fontFamily: 'SF-Pro', },
 
     fab: {
       position: 'absolute', bottom: 30, right: 30, backgroundColor: isDark ? '#fff' : '#1e1e1e',
       width: 65, height: 65, borderRadius: 35, justifyContent: 'center',
       alignItems: 'center', elevation: 10,
     },
-    fabText: { fontSize: 32, color: isDark ? '#000' : '#fff', fontWeight: '300', marginTop: -4 },
+    fabText: { fontSize: 32, color: isDark ? '#000' : '#fff', fontWeight: '300', marginTop: -4, fontFamily: 'SF-Pro', },
 
     header: {
       flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
       padding: 15, borderBottomWidth: 1, borderBottomColor: c.cardBorder, backgroundColor: c.cardBg,
     },
     backBtn: { padding: 5 },
-    backBtnText: { color: c.text, fontSize: 16 },
+    backBtnText: { color: c.text, fontSize: 16, fontFamily: 'SF-Pro', },
     headerButtons: { flexDirection: 'row', gap: 10 },
     
     editorPane: { flex: 1, padding: 20, backgroundColor: c.bg },
@@ -125,14 +147,15 @@ const createStyles = (isDark: boolean) => {
     inputTitle: {
       backgroundColor: c.cardBg, color: c.text, padding: 12, borderRadius: 8,
       fontSize: 16, fontWeight: '600', borderWidth: 1, borderColor: c.cardBorder,
+      fontFamily: 'SF-Pro-Bold',
     },
     inputTag: {
       backgroundColor: c.cardBg, color: c.tint, padding: 10, borderRadius: 8,
-      fontSize: 14, borderWidth: 1, borderColor: c.cardBorder,
+      fontSize: 14, borderWidth: 1, borderColor: c.cardBorder, fontFamily: 'SF-Pro',
     },
     textArea: { 
       flex: 1, color: c.textSec, fontSize: 16, lineHeight: 24, textAlignVertical: 'top',
-      backgroundColor: c.inputBg, borderRadius: 8, padding: 10,
+      backgroundColor: c.inputBg, borderRadius: 8, padding: 10, fontFamily: 'SF-Pro',
     },
 
     toolbar: { 
@@ -143,15 +166,15 @@ const createStyles = (isDark: boolean) => {
       backgroundColor: c.tint, paddingVertical: 8, paddingHorizontal: 16,
       borderRadius: 6, minWidth: 45, alignItems: 'center', justifyContent: 'center',
     },
-    toolBtnText: { color: isDark ? '#000' : '#fff', fontWeight: 'bold', fontSize: 14 },
+    toolBtnText: { color: isDark ? '#000' : '#fff', fontWeight: 'bold', fontSize: 14, fontFamily: 'SF-Pro-Bold', },
     
     previewPane: { flex: 1, padding: 20, backgroundColor: c.bg },
-    previewTitle: { fontSize: 32, fontWeight: 'bold', color: c.text, marginBottom: 15 },
+    previewTitle: { fontSize: 32, color: c.text, marginBottom: 15, fontFamily: 'SF-Pro-Bold', },
     tagBadge: {
       backgroundColor: c.tint, alignSelf: 'flex-start', paddingVertical: 8,
       paddingHorizontal: 15, borderRadius: 20, marginBottom: 25,
     },
-    tagText: { color: isDark ? '#000' : '#fff', fontSize: 14, fontWeight: 'bold', textTransform: 'uppercase' },
+    tagText: { color: isDark ? '#000' : '#fff', fontSize: 14, textTransform: 'uppercase', fontFamily: 'SF-Pro-Bold', },
   });
 };
 
@@ -162,12 +185,12 @@ export const useThemeStyles = (isDark: boolean) => {
 };
 
 export const markdownStylesGen = (isDark: boolean) => ({
-  body: { color: isDark ? '#e0e0e0' : '#333', fontSize: 18, lineHeight: 28 },
-  heading1: { color: isDark ? '#fff' : '#000', fontSize: 24, fontWeight: '700', marginVertical: 10 },
-  heading2: { color: isDark ? '#fff' : '#000', fontSize: 20, fontWeight: '700', marginVertical: 8 },
-  strong: { color: isDark ? '#fff' : '#000', fontWeight: '700' },
+  body: { color: isDark ? '#e0e0e0' : '#333', fontSize: 18, lineHeight: 28, fontFamily: 'SF-Pro', },
+  heading1: { color: isDark ? '#fff' : '#000', fontSize: 24, fontWeight: '700', marginVertical: 10, fontFamily: 'SF-Pro', },
+  heading2: { color: isDark ? '#fff' : '#000', fontSize: 20, fontWeight: '700', marginVertical: 8, fontFamily: 'SF-Pro', },
+  strong: { color: isDark ? '#fff' : '#000', fontWeight: '700', fontFamily: 'SF-Pro', },
   list_item: { marginVertical: 4 },
-  code_inline: { backgroundColor: isDark ? '#333' : '#e9ecef', color: isDark ? '#ffcc00' : '#d63384', padding: 4, borderRadius: 4 },
+  code_inline: { backgroundColor: isDark ? '#333' : '#e9ecef', color: isDark ? '#ffcc00' : '#d63384', padding: 4, borderRadius: 4, fontFamily: 'SF-Pro', },
 });
 
 export const markdownStyles = markdownStylesGen(true);

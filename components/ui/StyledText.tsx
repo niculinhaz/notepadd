@@ -14,13 +14,7 @@ export function StyledText(props: RNTextProps) {   // substitui RNText
 }
 
 export function Text(props: TextProps) {
-  const { style, ...rest } = props;
-  return (
-    <TamaguiText 
-      {...rest}
-      style={[{ fontFamily: 'SF-Pro' }, style]}
-    />
-  );
+  return <TamaguiText {...props} />;  
 }
 
 export function H1(props: HeadingProps) {

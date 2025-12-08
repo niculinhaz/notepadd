@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, View, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { Modal, View, TouchableOpacity, Dimensions } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Text } from '@/components/ui/StyledText';
 
 import { useThemeContext } from '../_layout';
 import { useThemeStyles } from '../../constants/theme';

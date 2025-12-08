@@ -114,7 +114,7 @@ export default function NotesScreen() {
         <View style={styles.searchBarContainer}>
           <Feather name="search" size={20} color={iconSecColor} />
           <TextInput 
-            style={styles.searchInput} 
+            style={[styles.searchInput, { fontFamily: 'SF-Pro' }]} 
             placeholder="pesquisar" 
             placeholderTextColor={iconSecColor} 
             value={searchText} 
