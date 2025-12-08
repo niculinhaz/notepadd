@@ -24,6 +24,9 @@ export const NoteCard = ({ item, isSelectionMode, isSelected, onSelect, onLongPr
   const checkboxUnselectedColor = isDarkMode ? '#ccc' : '#888';
   const checkboxSelectedColor = isDarkMode ? '#61dafb' : '#007acc';
 
+  const noTagBg = isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+  const noTagText = isDarkMode ? '#555' : '#999';
+
   const handlePress = () => {
     if (isSelectionMode) {
       onSelect(item.id);
@@ -36,7 +39,6 @@ export const NoteCard = ({ item, isSelectionMode, isSelected, onSelect, onLongPr
     <TouchableOpacity 
       style={[
         styles.noteCard,
-        // Altera a borda se estiver selecionado
         isSelected && { 
             borderColor: checkboxSelectedColor, 
             borderWidth: 2,
@@ -48,7 +50,6 @@ export const NoteCard = ({ item, isSelectionMode, isSelected, onSelect, onLongPr
       activeOpacity={0.7}
       delayLongPress={300}
     >
-      {}
       {isSelectionMode && (
         <View style={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}>
           <Feather 
@@ -64,17 +65,24 @@ export const NoteCard = ({ item, isSelectionMode, isSelected, onSelect, onLongPr
       </Text>
 
       <View style={styles.cardFooterContainer}>
-        <View style={styles.cardTitleRow}>
-          <Text style={styles.noteCardTitle} numberOfLines={1}>
-            {item.title || 'Sem título'}
-          </Text>
+        <Text 
+          style={[styles.noteCardTitle, { flex: 0, marginBottom: 6, width: '100%' }]} 
+          numberOfLines={1}
+        >
+          {item.title || 'Sem título'}
+        </Text>       
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>         
           {item.tag ? (
             <View style={styles.miniTagBadge}>
               <Text style={styles.miniTagText}>{item.tag}</Text>
             </View>
-          ) : null}
+          ) : (
+            <View style={[styles.miniTagBadge, { backgroundColor: noTagBg }]}>
+              <Text style={[styles.miniTagText, { color: noTagText }]}>SEM TAG</Text>
+            </View>
+          )}
+          <Text style={styles.noteDate}>{item.date}</Text>
         </View>
-        <Text style={styles.noteDate}>{item.date}</Text>
       </View>
     </TouchableOpacity>
   );
