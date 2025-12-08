@@ -2,29 +2,51 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { createTamagui, TamaguiProvider } from 'tamagui';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
+import React, { createContext, useState, useMemo, useEffect } from 'react';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import React from 'react';
+import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
 import { defaultConfig } from '@tamagui/config/v4';
 
 const config = createTamagui(defaultConfig);
 
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+export const AppThemeContext = createContext({
+  theme: 'light',
+  toggleTheme: () => {},
+});
+
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const systemTheme = useColorScheme();
+  const [theme, setTheme] = useState(systemTheme ?? 'light');
+  const [fontsLoaded] = useFonts({
+    'SF-Pro': require('../assets/fonts/SF-Pro.ttf'),
+  });
 
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  };
+
+  const ctxValue = useMemo(() => ({ theme, toggleTheme }), [theme]);
+
+  if (!fontsLoaded) {
+    return null;
+  }
   return (
-      <TamaguiProvider config={config} defaultTheme={colorScheme!}>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-
-          </Stack>
-          <StatusBar style="auto" />
+    <AppThemeContext.Provider value={ctxValue}>
+      <TamaguiProvider config={config} defaultTheme={theme}>
+        <ThemeProvider value={theme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack screenOptions={{ headerShown: false }} />
+          <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
         </ThemeProvider>
       </TamaguiProvider>
+    </AppThemeContext.Provider>
   );
 }
