@@ -8,7 +8,7 @@ import { useFocusEffect, router } from 'expo-router';
 import { styles } from '../../constants/theme';
 import { NoteCard } from '../../components/ui/note-card';
 import { FilterDrawer } from '../../components/ui/filter-drawer';
-import { Note } from '../../types';
+import { Note } from '../../types/index';
 
 const STORAGE_KEY = '@my_notes_app_final_v3';
 

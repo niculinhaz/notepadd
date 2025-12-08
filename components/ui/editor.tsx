@@ -64,7 +64,6 @@ export const Editor = ({
 
   const handleFormat = (prefix: string, suffix: string) => {
     const { start, end } = selection;
-
     setContent(
       content.substring(0, start) +
         prefix +
@@ -91,8 +90,7 @@ export const Editor = ({
           zIndex: 50,
         }}
       >
-
-        <TouchableOpacity onPress={handleExit}>
+        <TouchableOpacity onPress={handleExit} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Feather name="chevron-left" size={25} color="#fff" />
             <Text
@@ -109,7 +107,7 @@ export const Editor = ({
         </TouchableOpacity>
 
         {isEditing ? (
-          <TouchableOpacity onPress={save}>
+          <TouchableOpacity onPress={save} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
             <Text
               style={{
                 fontSize: 18,
@@ -121,18 +119,26 @@ export const Editor = ({
             </Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity onPress={onDelete}>
+          <TouchableOpacity onPress={onDelete} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
             <Feather name="trash-2" size={22} color="#cf6679" />
           </TouchableOpacity>
         )}
       </View>
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 5 : 0}
       >
         {isEditing ? (
-          <View style={{ flex: 1 }}>
+          <ScrollView
+            style={{ flex: 1 }}
+            keyboardShouldPersistTaps="always"
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingBottom: 30,
+            }}
+          >
             <View style={styles.editorPane}>
               <View style={styles.inputsContainer}>
                 <TextInput
@@ -158,44 +164,40 @@ export const Editor = ({
                 placeholderTextColor="#444"
                 value={content}
                 onChangeText={setContent}
-                onSelectionChange={(e) =>
-                  setSelection(e.nativeEvent.selection)
-                }
+                onSelectionChange={(e) => setSelection(e.nativeEvent.selection)}
                 autoFocus
               />
             </View>
-            <View style={styles.toolbar}>
+
+            {/* TOOLBAR */}
+            <View style={[styles.toolbar, { marginTop: 16 }]}>
               <ScrollView
                 horizontal
                 contentContainerStyle={styles.toolbarContent}
                 keyboardShouldPersistTaps="always"
+                showsHorizontalScrollIndicator={false}
               >
                 {["**", "*", "# ", "## ", "\n- ", "`"].map((sym, i) => (
                   <TouchableOpacity
                     key={i}
                     style={styles.toolBtn}
-                    onPress={() =>
+                    onPress={() => {
+                      performHaptic();
                       handleFormat(
                         sym,
-                        sym.trim() === "**" ||
-                          sym.trim() === "*" ||
-                          sym.trim() === "`"
-                          ? sym
-                          : ""
-                      )
-                    }
+                        sym.trim() === "**" || sym.trim() === "*" || sym.trim() === "`" ? sym : ""
+                      );
+                    }}
                   >
-                    <Text style={styles.toolBtnText}>
-                      {["B", "I", "H1", "H2", "List", "Code"][i]}
-                    </Text>
+                    <Text style={styles.toolBtnText}>{["B", "I", "H1", "H2", "List", "Code"][i]}</Text>
                   </TouchableOpacity>
                 ))}
               </ScrollView>
             </View>
-          </View>
+          </ScrollView>
         ) : (
           <View style={{ flex: 1 }}>
-            <ScrollView style={styles.previewPane}>
+            <ScrollView style={styles.previewPane} contentContainerStyle={{ paddingBottom: 40 }}>
               <TouchableOpacity activeOpacity={1} onPress={toggleToEdit}>
                 <Text style={styles.previewTitle}>{title}</Text>
 
