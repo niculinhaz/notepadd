@@ -1,3 +1,18 @@
+Arthur Pacheco da Cunha Ferreira SP3123022 - arthurpachecof
+
+Gabriel Freitas Nakata SP3119548 - gabrielfnakata
+
+Glauco Condo de Lucca SP3123073 - glaucolucca
+
+Larissa Lumy Higue SP3122778 - larissalumy
+
+Maria Luisa de Aquino Vicente SP3124444 - mluisa-aquino
+
+Nicholas Ferraz Pinheiro SP3121101 - niculinhaz
+
+OBSERVAÇÃO: A VERSÃO FINAL DO APLICATIVO ESTÁ NA TAG V1.0-FINAL NA BRANCH "feature/multi-delete"
+
+
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
