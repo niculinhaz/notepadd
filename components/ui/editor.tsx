@@ -111,7 +111,7 @@ export const Editor = ({
 
   const save = async () => {
     performHaptic();
-    const finalMarkdown = converter.convert(htmlContent);
+    const finalMarkdown = htmlToMarkdown(htmlContent);
     onSave(finalMarkdown);
   };
 
@@ -136,14 +136,6 @@ export const Editor = ({
   const toggleToEdit = () => {
     performHaptic();
     setIsEditing(true);
-  };
-
-  const handleChange = (html: string) => {
-    try {
-      setContent(htmlToMarkdown(html));
-    } catch (e) {
-      console.error(e);
-    }
   };
 
   const parseHtml = (markdown: string) => {
