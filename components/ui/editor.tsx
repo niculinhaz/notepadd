@@ -1,4 +1,8 @@
 import { Text, TextInput } from '@/components/ui/StyledText';
+import { Feather } from "@expo/vector-icons";
+import * as Haptics from "expo-haptics";
+import { marked } from 'marked';
+
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Keyboard,
@@ -8,23 +12,17 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import FontFamilyStylesheet from "../../constants/stylesheet";
-
-import { Feather } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
-import { marked } from 'marked';
 import Markdown from "react-native-markdown-display";
 import { actions, RichEditor, RichToolbar } from "react-native-pell-rich-editor";
-
-import { autoPlacement } from "@floating-ui/core";
 import { useThemeContext } from "../../app/_layout";
+import FontFamilyStylesheet from "../../constants/stylesheet";
 import { markdownStylesGen, useThemeStyles } from "../../constants/theme";
 
 const converter = require('@vimeiro-co/react-native-html-to-markdown');
 converter.use(function (html: string) {
   return html
     .replace(/<br\s*\/?>/gi, '\n')
-})
+});
 
 interface Props {
   title: string;
@@ -35,7 +33,7 @@ interface Props {
   setContent: (c: string) => void;
   isEditing: boolean;
   setIsEditing: (b: boolean) => void;
-  onSave: () => void;
+  onSave: (newContent: string) => void;
   onDelete: () => void;
   onExit: () => void;
 }
@@ -58,7 +56,7 @@ export const Editor = ({
   const { isDarkMode } = useThemeContext();
   const styles = useThemeStyles(isDarkMode);
   const markdownStyles = markdownStylesGen(isDarkMode);
-
+  const [htmlContent, setHtmlContent] = useState('');
   const [keyboardAvoidingViewKey, setKeyboardAvoidingViewKey] = useState('keyboardAvoidingView');
   
   const colors = {
@@ -109,15 +107,37 @@ export const Editor = ({
     Haptics.selectionAsync();
   };
 
-  const save = () => {
+  const parseHtml = (markdown: string) => {
+    try {
+      marked.setOptions({async: false});
+      return marked.parse(markdown || "") as string;
+    } catch (e) {
+      console.error("Erro ao converter Markdown para HTML:", e);
+      return "";
+    }
+  }
+
+  const save = async () => {
     performHaptic();
-    onSave();
-    setIsEditing(false);
+    const finalMarkdown = converter.convert(htmlContent);
+    onSave(finalMarkdown);
   };
+
+  useEffect(() => {
+    if (isEditing) {
+      const initialHtml = parseHtml(content);
+      
+      setHtmlContent(initialHtml);
+      
+      setTimeout(() => {
+        editorRef.current?.setContentHTML(initialHtml);
+      }, 100); 
+    }
+  }, [content, isEditing]);
+
 
   const handleExit = () => {
     performHaptic();
-    setIsEditing(false);
     onExit();
   };
 
@@ -126,22 +146,6 @@ export const Editor = ({
     setIsEditing(true);
   };
 
-  const handleChange = (html: string) => {
-    try {
-      setContent(converter.convert(html));
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const parseHtml = (markdown: string) => {
-    try {
-      marked.setOptions({async: false});
-      return marked.parse(markdown) as string;
-    } catch (e) {
-      console.error(e);
-    }
-  }
   const richEditorStyles = {
     backgroundColor: colors.bg,
     caretColor: colors.okBtn,
@@ -159,7 +163,9 @@ export const Editor = ({
       color: ${colors.text};
       font-size: 16px;
     `,
-};
+  };
+
+  const placeholderText = content.trim() !== '' ? '' : "Digite aqui...";
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -216,12 +222,12 @@ export const Editor = ({
         )}
       </View>
 
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? autoPlacement : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? autoPlacement : 0}
-        key={keyboardAvoidingViewKey}
-      >
+      <React.Fragment key={keyboardAvoidingViewKey}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"} 
+          keyboardVerticalOffset={0} 
+        >
         {isEditing ? (
           <ScrollView
             style={{ flex: 1 }}
@@ -249,33 +255,32 @@ export const Editor = ({
                 />
               </View>
               <RichEditor
-                  ref={editorRef}
-                  initialContentHTML={parseHtml(content)}
-                  editorStyle={dynamicEditorStyle}
-                  useContainer={false}
-                  placeholder="Digite aqui..."
-                  onChange={handleChange}
-                />
-                </View>
-                <RichToolbar
-                  editor={editorRef}  
-                  selectedButtonStyle={styles.toolBtn}
-                  unselectedButtonStyle={styles.unselectedToolBtn}
-                  actions={[
-                    actions.setBold,
-                    actions.setItalic,
-                    actions.setStrikethrough,
-                    actions.insertBulletsList,
-                    actions.insertOrderedList,
-                    actions.removeFormat,
-                    actions.undo,
-                    actions.redo,
-                  ]}
-                  style={{
-                    backgroundColor: colors.bg
-                  }}
-                />
-              </ScrollView>
+                ref={editorRef}
+                editorStyle={dynamicEditorStyle}
+                useContainer={false}
+                placeholder={placeholderText}
+                onChange={setHtmlContent} 
+              />
+              </View>
+              <RichToolbar
+                editor={editorRef}  
+                selectedButtonStyle={styles.toolBtn}
+                unselectedButtonStyle={styles.unselectedToolBtn}
+                actions={[
+                  actions.setBold,
+                  actions.setItalic,
+                  actions.setStrikethrough,
+                  actions.insertBulletsList,
+                  actions.insertOrderedList,
+                  actions.removeFormat,
+                  actions.undo,
+                  actions.redo,
+                ]}
+                style={{
+                  backgroundColor: colors.bg
+                }}
+              />
+            </ScrollView>
         ) : (
           <View style={{ flex: 1 }}>
             <ScrollView style={styles.previewPane} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -297,17 +302,18 @@ export const Editor = ({
                       color: colors.placeholder, 
                       fontSize: 18, 
                       marginTop: 10,
-                  }}>
+                    }}>
                     Pressione para começar a digitar...
                   </Text>
                 ) : (
-                   <Markdown style={markdownStyles}>{content}</Markdown>
+                    <Markdown style={markdownStyles}>{content}</Markdown>
                 )}
               </TouchableOpacity>
             </ScrollView>
           </View>
         )}
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </React.Fragment>
     </View>
   );
 };
