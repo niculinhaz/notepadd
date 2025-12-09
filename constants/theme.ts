@@ -229,18 +229,38 @@ export const markdownStylesGen = (isDark: boolean) => ({
   text: {
     fontFamily: 'SF-Pro',
   },
-  heading1: { color: isDark ? '#fff' : '#000', fontSize: 24, marginVertical: 10, fontFamily: 'SF-Pro-Bold', },
-  heading2: { color: isDark ? '#fff' : '#000', fontSize: 20, marginVertical: 8, fontFamily: 'SF-Pro-Bold', },
-  strong: { color: isDark ? '#fff' : '#000', fontFamily: 'SF-Pro-Bold', },
+  heading1: { 
+    color: isDark ? '#fff' : '#000', 
+    fontSize: 24, 
+    marginVertical: 10, 
+    fontFamily: 'SF-Pro-Bold', 
+    fontWeight: 'normal',
+  },
+  heading2: { 
+    color: isDark ? '#fff' : '#000', 
+    fontSize: 20, 
+    marginVertical: 8, 
+    fontFamily: 'SF-Pro-', 
+    fontWeight: 'normal',
+  },
+  strong: { 
+    color: isDark ? '#fff' : '#000', 
+    fontFamily: 'SF-Pro', 
+    fontWeight: 'bold', 
+  },
+  italic: { 
+    fontStyle: 'italic', 
+    fontFamily: 'SF-Pro', },
   list_item: { marginVertical: 4 },
   code_inline: { backgroundColor: isDark ? '#333' : '#e9ecef', color: isDark ? '#ffcc00' : '#d63384', padding: 4, borderRadius: 4, fontFamily: 'SF-Pro', },
 });
 
 export const cardMarkdownStyles  = (isDark: boolean) => ({
   body: { color: isDark ? '#e0e0e0' : '#333', fontSize: 12, lineHeight: 28, fontFamily: 'SF-Pro', },
-  heading1: { color: isDark ? '#fff' : '#000', fontSize: 16, fontWeight: '700', marginVertical: 10, fontFamily: 'SF-Pro', },
-  heading2: { color: isDark ? '#fff' : '#000', fontSize: 14, fontWeight: '700', marginVertical: 8, fontFamily: 'SF-Pro', },
-  strong: { color: isDark ? '#fff' : '#000', fontWeight: '700', fontFamily: 'SF-Pro', },
+  heading1: { color: isDark ? '#fff' : '#000', fontSize: 16,  marginVertical: 10, fontFamily: 'SF-Pro-Bold', },
+  heading2: { color: isDark ? '#fff' : '#000', fontSize: 14, marginVertical: 8, fontFamily: 'SF-Pro-Bold', },
+  strong: { color: isDark ? '#fff' : '#000', fontFamily: 'SF-Pro', fontWeight: 'bold', },
+  italic: { fontStyle: 'italic', fontFamily: 'SF-Pro', },
   list_item: { marginVertical: 4, fontFamily: 'SF-Pro' },
   code_inline: { backgroundColor: isDark ? '#333' : '#e9ecef', color: isDark ? '#ffcc00' : '#d63384', padding: 4, borderRadius: 4, fontFamily: 'SF-Pro', },
 });
