@@ -55,8 +55,6 @@ export default function NoteDetailScreen() {
       router.back();
       return;
     }
-    
-    console.log(content);
 
     const noteData = {
       title: title || 'Sem Título', 
