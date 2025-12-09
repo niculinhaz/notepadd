@@ -111,7 +111,9 @@ export const Editor = ({
 
   const save = async () => {
     performHaptic();
+    console.log(htmlContent);
     const finalMarkdown = htmlToMarkdown(htmlContent);
+    console.log(finalMarkdown);
     onSave(finalMarkdown);
   };
 
@@ -254,6 +256,7 @@ export const Editor = ({
                 editorStyle={dynamicEditorStyle}
                 useContainer={false}
                 placeholder={placeholderText}
+                initialContentHTML={parseHtml(content)}
                 onChange={setHtmlContent} 
               />
               </View>
