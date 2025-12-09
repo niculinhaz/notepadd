@@ -37,6 +37,7 @@ export default function RootLayout() {
     {
     'SF-Pro': require('../assets/fonts/SF-Pro-Display-Medium.otf'),
     'SF-Pro-Bold': require('../assets/fonts/SF-Pro-Display-Bold.otf'),
+    'SF-Pro-Italic': require('../assets/fonts/SF-Pro-Italic.otf'),
     } : {}
   );
 
