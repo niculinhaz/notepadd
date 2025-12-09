@@ -94,7 +94,9 @@ export const Editor = ({
 
   const save = async () => {
     performHaptic();
+    console.log(htmlContent);
     const finalMarkdown = htmlToMarkdown(htmlContent);
+    console.log(finalMarkdown);
     onSave(finalMarkdown);
   };
 
