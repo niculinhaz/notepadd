@@ -93,7 +93,7 @@ const createStyles = (isDark: boolean) => {
     },
     infoText: { color: c.text, fontSize: 14, fontWeight: '600', fontFamily: 'SF-Pro-Bold',},
     sortButton: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-    sortText: { color: c.textMuted, fontSize: 12 },
+    sortText: { color: c.textMuted, fontSize: 12, fontFamily: 'SF-Pro' },
 
     notesList: { paddingHorizontal: 20, paddingBottom: 100 },
     columnWrapper: { justifyContent: 'space-between', marginBottom: 15 },
@@ -131,7 +131,7 @@ const createStyles = (isDark: boolean) => {
     },
 
     miniTagBadge: { backgroundColor: isDark ? 'rgba(97, 218, 251, 0.15)' : 'rgba(0, 122, 204, 0.1)', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6 },
-    miniTagText: { color: c.tint, fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', fontFamily: 'SF-Pro-Bold', },
+    miniTagText: { color: c.tint, fontSize: 10, textTransform: 'uppercase', fontFamily: 'SF-Pro-Bold', },
     noteDate: { color: c.textMuted, fontSize: 11, fontFamily: 'SF-Pro', },
 
     fab: {
@@ -219,9 +219,19 @@ export const useThemeStyles = (isDark: boolean) => {
 
 export const markdownStylesGen = (isDark: boolean) => ({
   body: { color: isDark ? '#e0e0e0' : '#333', fontSize: 18, lineHeight: 28, fontFamily: 'SF-Pro', },
-  heading1: { color: isDark ? '#fff' : '#000', fontSize: 24, fontWeight: '700', marginVertical: 10, fontFamily: 'SF-Pro', },
-  heading2: { color: isDark ? '#fff' : '#000', fontSize: 20, fontWeight: '700', marginVertical: 8, fontFamily: 'SF-Pro', },
-  strong: { color: isDark ? '#fff' : '#000', fontWeight: '700', fontFamily: 'SF-Pro', },
+  paragraph: {
+    color: isDark ? '#e0e0e0' : '#333', 
+    fontSize: 18,
+    lineHeight: 28,
+    fontFamily: 'SF-Pro',
+    marginVertical: 8, 
+  },
+  text: {
+    fontFamily: 'SF-Pro',
+  },
+  heading1: { color: isDark ? '#fff' : '#000', fontSize: 24, marginVertical: 10, fontFamily: 'SF-Pro-Bold', },
+  heading2: { color: isDark ? '#fff' : '#000', fontSize: 20, marginVertical: 8, fontFamily: 'SF-Pro-Bold', },
+  strong: { color: isDark ? '#fff' : '#000', fontFamily: 'SF-Pro-Bold', },
   list_item: { marginVertical: 4 },
   code_inline: { backgroundColor: isDark ? '#333' : '#e9ecef', color: isDark ? '#ffcc00' : '#d63384', padding: 4, borderRadius: 4, fontFamily: 'SF-Pro', },
 });
@@ -242,9 +252,9 @@ export const editorStyle = {
     caretColor: isDark ? darkColors.tint : lightColors.tint,
     color: isDark ? darkColors.text : lightColors.text,
     cssText: `
-      border-radius: 12px,
-      border: 1px solid #333
+      border-radius: 12px;
+      border: 1px solid #333;
     `
-  }
+}
 
 export const markdownStyles = markdownStylesGen(true);

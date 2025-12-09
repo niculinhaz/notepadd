@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text as RNText, TextProps as RNTextProps } from 'react-native';
+import { Text as RNText, TextInput as RNTextInput, TextProps as RNTextProps, TextInputProps } from 'react-native';
 import { Text as TamaguiText, TextProps } from '@tamagui/core';
 import { H1 as TamaguiH1, H2 as TamaguiH2, H3 as TamaguiH3 } from 'tamagui';
 import type { HeadingProps } from '@tamagui/text';
@@ -15,6 +15,15 @@ export function StyledText(props: RNTextProps) {   // substitui RNText
 
 export function Text(props: TextProps) {
   return <TamaguiText {...props} />;  
+}
+
+export function TextInput(props: TextInputProps) {
+  return (
+    <RNTextInput 
+      {...props} 
+      style={[{ fontFamily: 'SF-Pro-Bold' }, props.style]}
+    />
+  );
 }
 
 export function H1(props: HeadingProps) {

@@ -4,11 +4,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import FontFamilyStylesheet from "../../constants/stylesheet";
+import { Text, TextInput } from '@/components/ui/StyledText';
 
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -142,6 +142,24 @@ export const Editor = ({
       console.error(e);
     }
   }
+  const richEditorStyles = {
+    backgroundColor: colors.bg,
+    caretColor: colors.okBtn,
+    color: colors.text,
+    initialCSSText: `
+      ${FontFamilyStylesheet}
+      body, div, p, span, * { 
+        font-family: 'SFProCustom' !important; 
+        color: ${colors.text};
+        font-size: 16px;
+      }
+    `,
+    contentCSSText: `
+      font-family: 'SFProCustom' !important;
+      color: ${colors.text};
+      font-size: 16px;
+    `,
+};
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
@@ -170,6 +188,7 @@ export const Editor = ({
                 marginLeft: 4,
                 lineHeight: 22,
                 fontWeight: undefined,
+                fontFamily: 'SF-Pro',
               }}
             >
               Voltar
@@ -184,6 +203,7 @@ export const Editor = ({
                 fontSize: 18,
                 fontWeight: "bold",
                 color: colors.okBtn,
+                fontFamily: 'SF-Pro',
               }}
             >
               OK
@@ -221,7 +241,7 @@ export const Editor = ({
                   onChangeText={setTitle}
                 />
                 <TextInput
-                  style={styles.inputTag}
+                  style={styles.inputTitle}           
                   placeholder="#tag"
                   placeholderTextColor={colors.placeholder}
                   value={tag}
