@@ -94,16 +94,12 @@ export const Editor = ({
 
   const save = async () => {
     performHaptic();
-    console.log(htmlContent);
     const finalMarkdown = htmlToMarkdown(htmlContent);
-    console.log(finalMarkdown);
     onSave(finalMarkdown);
   };
 
-
   useEffect(() => {
     if (!isEditing) return;
-
 
     if (!hasLoadedRef.current) {
       const initialHtml = markdownToHtml(content);
@@ -115,7 +111,6 @@ export const Editor = ({
       });
       return;
     }
-
 
     requestAnimationFrame(() => {
       editorRef.current?.setContentHTML(htmlContent);
@@ -204,7 +199,7 @@ export const Editor = ({
                 editorStyle={dynamicEditorStyle}
                 useContainer={false}
                 placeholder={placeholderText}
-                initialContentHTML={htmlContent}  
+                initialContentHTML={htmlContent}
                 onChange={setHtmlContent}
               />
             </View>
@@ -218,6 +213,7 @@ export const Editor = ({
                 actions.setItalic,
                 actions.setStrikethrough,
                 actions.insertBulletsList,
+                actions.insertOrderedList,
                 actions.removeFormat,
                 actions.undo,
                 actions.redo,

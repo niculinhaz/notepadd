@@ -23,6 +23,7 @@
     "@tamagui/shorthands": "^1.138.2",
     "@tamagui/text": "^1.138.2",
     "@tamagui/themes": "^1.138.2",
+    "@vimeiro-co/react-native-html-to-markdown": "^1.0.8",
     "expo": "~54.0.25",
     "expo-constants": "~18.0.10",
     "expo-crypto": "~15.0.8",
