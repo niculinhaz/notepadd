@@ -55,7 +55,6 @@ export default function NotesScreen() {
   const loadNotes = async () => {
     try {
       const fetchedNotes = await getAllNotes(db);
-      console.log(fetchedNotes);
       setNotes(fetchedNotes || []);
     } 
     catch (e) { console.error(e); }
