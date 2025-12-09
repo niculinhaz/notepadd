@@ -50,18 +50,16 @@ export default function NoteDetailScreen() {
     } catch (e) { console.error(e); }
   };
 
-  const handleSave = async () => {
-    if (!title && !content) {
+  const handleSave = async (newContent: string, finishEditing: () => void) => {
+    if (!title && !newContent) {
       router.back();
       return;
     }
-    
-    console.log(content);
 
     const noteData = {
       title: title || 'Sem Título', 
       tag, 
-      content, 
+      content: newContent,
       date: new Date().toLocaleDateString('pt-BR')
     };
 
@@ -81,6 +79,8 @@ export default function NoteDetailScreen() {
       
       setCurrentId(newId);
     }
+    setContent(newContent);
+    finishEditing();
   };
 
   const handleDelete = () => {
@@ -117,9 +117,12 @@ export default function NoteDetailScreen() {
         tag={tag} setTag={setTag}
         content={content} setContent={setContent}
         isEditing={isEditing} setIsEditing={setIsEditing}
-        onSave={handleSave}
+        onSave={(newContent) => handleSave(newContent, () => setIsEditing(false))}
         onDelete={handleDelete}
-        onExit={() => router.back()}
+        onExit={() => {
+          setIsEditing(false);
+          router.back();
+        }}
       />
 
       <Modal
@@ -155,7 +158,7 @@ export default function NoteDetailScreen() {
               marginBottom: 10,
               fontFamily: 'SF-Pro'
             }}>
-              Excluir Nota: 
+              Excluir Nota 
             </Text>
             
             <Text style={{
