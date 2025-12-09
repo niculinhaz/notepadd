@@ -2,6 +2,7 @@ import { Text, TextInput } from '@/components/ui/StyledText';
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import { marked } from 'marked';
+
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Keyboard,

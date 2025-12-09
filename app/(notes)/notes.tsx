@@ -2,18 +2,18 @@ import { Feather } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import React, { useCallback, useState } from 'react';
 import {
+  BackHandler,
   FlatList,
   Image,
+  Modal,
   TextInput,
   TouchableOpacity,
-  View,
-  BackHandler,
-  Modal
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui/StyledText';
-import { getAllNotes, deleteNotesBulk } from '@/database/database';
+import { deleteNotesBulk, deleteTags, getAllNotes } from '@/database/database';
 import { Note } from '@/type';
 import { useSQLiteContext } from 'expo-sqlite';
 import { FilterDrawer } from '../../components/ui/filter-drawer';
@@ -55,6 +55,7 @@ export default function NotesScreen() {
   const loadNotes = async () => {
     try {
       const fetchedNotes = await getAllNotes(db);
+      console.log(fetchedNotes);
       setNotes(fetchedNotes || []);
     } 
     catch (e) { console.error(e); }
@@ -119,6 +120,11 @@ export default function NotesScreen() {
     return result;
   };
 
+  const handleDeleteTags = async (tag: string) => {
+    await deleteTags(db, tag);
+    await loadNotes();
+  };
+
   const filteredNotes = getFilteredNotes();
   const iconColor = isDarkMode ? '#fff' : '#000';
   const iconSecColor = isDarkMode ? '#666' : '#888';
@@ -135,6 +141,7 @@ export default function NotesScreen() {
         onSelectTag={handleSelectTag}
         isDarkMode={isDarkMode}
         onToggleTheme={toggleTheme}
+        onDeleteTags={handleDeleteTags}
       />
 
       <View style={styles.headerTop}>
