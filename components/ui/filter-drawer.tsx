@@ -103,7 +103,7 @@ export const FilterDrawer = ({
                 { transform: [{ translateX: slideAnim }] }
               ]}
             >
-              <Text style={styles.drawerHeader}>filtros</Text>
+              <Text style={styles.drawerHeader}>Filtros</Text>
 
               <ScrollView>
                 {tags.map((item, index) => (

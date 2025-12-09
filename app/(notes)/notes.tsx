@@ -198,7 +198,9 @@ export default function NotesScreen() {
             disabled={isSelectionMode}
         >
             <Feather name={sortOrder === 'desc' ? "arrow-down" : "arrow-up"} size={12} color={iconSecColor} />
-            <Text style={styles.sortText}>data de criação</Text>
+            <Text style={[styles.sortText, { fontFamily: 'SF-Pro' }]}>
+              data de criação
+            </Text>
         </TouchableOpacity>
       </View>
 

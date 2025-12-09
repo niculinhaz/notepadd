@@ -35,7 +35,7 @@ export default function RootLayout() {
   const [fontsLoaded] = useFonts(
     shouldLoadCustomFonts ?
     {
-    'SF-Pro': require('../assets/fonts/SF-Pro.ttf'),
+    'SF-Pro': require('../assets/fonts/SF-Pro-Display-Medium.otf'),
     'SF-Pro-Bold': require('../assets/fonts/SF-Pro-Display-Bold.otf'),
     } : {}
   );
