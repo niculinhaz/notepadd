@@ -16,13 +16,13 @@ export async function initDatabase(db: SQLite.SQLiteDatabase) {
 
 export async function insertNote(db: SQLite.SQLiteDatabase, note: Note) {
     await db.runAsync('INSERT INTO notes (id, title, tag, content, date) VALUES (?, ?, ?, ?, ?);', 
-        note.id, note.title, note.tag, note.content, note.date
+        note.id, note.title.trim(), note.tag.trim().toUpperCase(), note.content, note.date
     );
 }
 
 export async function updateNote(db: SQLite.SQLiteDatabase, note: Note) {
     await db.runAsync('UPDATE notes SET title = ?, tag = ?, content = ?, date = ? WHERE id = ?',
-        note.title, note.tag, note.content, note.date, note.id
+        note.title.trim(), note.tag.trim().toUpperCase(), note.content, note.date, note.id
     );
 }
 
@@ -46,4 +46,10 @@ export async function deleteNotesBulk(db: SQLite.SQLiteDatabase, ids: string[]) 
     if (ids.length === 0) return;
     const placeholders = ids.map(() => '?').join(',');
     await db.runAsync(`DELETE FROM notes WHERE id IN (${placeholders})`, ids);
+}
+
+export async function deleteTags(db: SQLite.SQLiteDatabase, tag: string) {
+    await db.runAsync('UPDATE notes SET tag = ? WHERE tag = ?',
+        '', tag.trim().toUpperCase()
+    );
 }

@@ -1,16 +1,16 @@
-import React, { useEffect, useRef } from 'react';
-import { 
-  Modal, 
-  TouchableOpacity, 
-  TouchableWithoutFeedback, 
-  View,  
-  ScrollView, 
-  Animated, 
-  Dimensions 
-} from 'react-native';
-import { Feather } from "@expo/vector-icons";
-import { useThemeStyles } from '../../constants/theme';
 import { Text } from '@/components/ui/StyledText';
+import { Feather } from "@expo/vector-icons";
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Animated,
+  Dimensions,
+  Modal,
+  ScrollView,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View
+} from 'react-native';
+import { useThemeStyles } from '../../constants/theme';
 
 interface TagCount {
   name: string;
@@ -23,9 +23,9 @@ interface Props {
   tags: TagCount[];
   selectedTag: string;
   onSelectTag: (tag: string) => void;
-
   isDarkMode: boolean;
   onToggleTheme: () => void;
+  onDeleteTags: (tag: string) => Promise<void>;
 }
 
 export const FilterDrawer = ({
@@ -35,13 +35,15 @@ export const FilterDrawer = ({
   selectedTag,
   onSelectTag,
   isDarkMode,
-  onToggleTheme
+  onToggleTheme,
+  onDeleteTags
 }: Props) => {
   const styles = useThemeStyles(isDarkMode);
   const screenWidth = Dimensions.get('window').width;
   
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-screenWidth)).current;
+  const [isDeleteVisible, setIsDeleteVisible] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -103,8 +105,12 @@ export const FilterDrawer = ({
                 { transform: [{ translateX: slideAnim }] }
               ]}
             >
-              <Text style={styles.drawerHeader}>Filtros</Text>
-
+              <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text style={styles.drawerHeader}>Filtros</Text>
+                <TouchableOpacity onPress={() => setIsDeleteVisible((prevState) => !prevState)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                  <Feather name="trash-2" size={22} color='#cf6679' />
+                </TouchableOpacity>
+              </View>
               <ScrollView>
                 {tags.map((item, index) => (
                   <TouchableOpacity
@@ -120,7 +126,16 @@ export const FilterDrawer = ({
                     >
                       {item.name}
                     </Text>
-                    <Text style={styles.drawerCount}>{item.count}</Text>
+                    <View style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center', gap: 15 }}>
+                      {isDeleteVisible && (item.name !== 'Sem tag' && item.name !== 'Todas as notas')
+                        && (
+                          <TouchableOpacity onPress={() => onDeleteTags(item.name)} >
+                            <Feather name="minus-circle" size={19} color='#cf6679' />
+                          </TouchableOpacity>
+                        )  
+                      }
+                      <Text style={styles.drawerCount}>{item.count}</Text>
+                    </View>
                   </TouchableOpacity>
                 ))}
               </ScrollView>

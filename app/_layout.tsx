@@ -7,12 +7,12 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from "expo-sqlite";
 import * as SystemUI from 'expo-system-ui';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { StatusBar } from 'react-native';
+import { Platform, StatusBar } from 'react-native';
 import { createTamagui, TamaguiProvider } from 'tamagui';
 
 const config = createTamagui(defaultConfig);
 
-SplashScreen.preventAutoHideAsync();
+// SplashScreen.preventAutoHideAsync();
 
 type ThemeType = 'light' | 'dark';
 
@@ -31,11 +31,15 @@ const ThemeContext = createContext<ThemeContextData>({
 export const useThemeContext = () => useContext(ThemeContext);
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
-    'SF-Pro': require('../assets/fonts/SF-Pro.ttf'),
-    'SF-Pro-Bold': require('../assets/fonts/SF-Pro-Bold.otf'),
+  const shouldLoadCustomFonts = Platform.OS !== 'ios';
+  const [fontsLoaded] = useFonts(
+    shouldLoadCustomFonts ?
+    {
+    'SF-Pro': require('../assets/fonts/SF-Pro-Display-Medium.otf'),
+    'SF-Pro-Bold': require('../assets/fonts/SF-Pro-Display-Bold.otf'),
     'SF-Pro-Italic': require('../assets/fonts/SF-Pro-Italic.otf'),
-  });
+    } : {}
+  );
 
   const [theme, setTheme] = useState<ThemeType>('dark');
 
@@ -85,10 +89,8 @@ export default function RootLayout() {
               animation: 'slide_from_right',
             }}
           >
-            {/* Tela Inicial */}
             <Stack.Screen name="(notes)/notes" />
 
-            {/* Tela da Nota */}
             <Stack.Screen 
               name="(notes)/[noteId]" 
               options={{ 

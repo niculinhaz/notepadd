@@ -1,3 +1,4 @@
+import { Text, TextInput } from '@/components/ui/StyledText';
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Keyboard,
@@ -8,7 +9,6 @@ import {
   View,
 } from "react-native";
 import FontFamilyStylesheet from "../../constants/stylesheet";
-import { Text, TextInput } from '@/components/ui/StyledText';
 
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
