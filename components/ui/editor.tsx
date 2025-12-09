@@ -12,10 +12,11 @@ import FontFamilyStylesheet from "../../constants/stylesheet";
 
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { marked } from 'marked';
 import Markdown from "react-native-markdown-display";
 import { actions, RichEditor, RichToolbar } from "react-native-pell-rich-editor";
 
+import { markdownToHtml } from '@/utils/htmlconverter';
+import { htmlToMarkdown } from '@/utils/markdownconverter';
 import { autoPlacement } from "@floating-ui/core";
 import { useThemeContext } from "../../app/_layout";
 import { markdownStylesGen, useThemeStyles } from "../../constants/theme";
@@ -128,7 +129,7 @@ export const Editor = ({
 
   const handleChange = (html: string) => {
     try {
-      setContent(converter.convert(html));
+      setContent(htmlToMarkdown(html));
     } catch (e) {
       console.error(e);
     }
@@ -136,8 +137,7 @@ export const Editor = ({
 
   const parseHtml = (markdown: string) => {
     try {
-      marked.setOptions({async: false});
-      return marked.parse(markdown) as string;
+      return markdownToHtml(markdown);
     } catch (e) {
       console.error(e);
     }
@@ -201,9 +201,8 @@ export const Editor = ({
             <Text
               style={{
                 fontSize: 18,
-                fontWeight: "bold",
                 color: colors.okBtn,
-                fontFamily: 'SF-Pro',
+                fontFamily: 'SF-Pro-Bold',
               }}
             >
               OK
