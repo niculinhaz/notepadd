@@ -22,8 +22,7 @@ import { markdownStylesGen, useThemeStyles } from "../../constants/theme";
 
 const converter = require('@vimeiro-co/react-native-html-to-markdown');
 converter.use(function (html: string) {
-  return html
-    .replace(/<br\s*\/?>/gi, '\n')
+  return html.replace(/<br\s*\/?>/gi, '\n');
 });
 
 interface Props {
@@ -53,14 +52,16 @@ export const Editor = ({
   onDelete,
   onExit
 }: Props) => {
+
   const editorRef = useRef<RichEditor>(null);
-  
+  const hasLoadedRef = useRef(false); 
+
   const { isDarkMode } = useThemeContext();
   const styles = useThemeStyles(isDarkMode);
   const markdownStyles = markdownStylesGen(isDarkMode);
-  const [htmlContent, setHtmlContent] = useState('');
-  const [keyboardAvoidingViewKey, setKeyboardAvoidingViewKey] = useState('keyboardAvoidingView');
-  
+
+  const [htmlContent, setHtmlContent] = useState("");
+
   const colors = {
     bg: isDarkMode ? "#050505" : "#f8f9fa",
     editorBox: isDarkMode ? "#1a1a1a" : "#ffffffff",
@@ -87,24 +88,6 @@ export const Editor = ({
     `,
   };
 
-
-  const keyboardHideListenerCallback = useCallback(() => {
-    setKeyboardAvoidingViewKey(
-      'keyboardAvoidingViewKey' + new Date().getTime(),
-    );
-  }, []);
-
-  useEffect(() => {
-    const keyboardHideListener = Keyboard.addListener(
-      Platform.OS === 'android' ? 'keyboardDidHide' : 'keyboardWillHide',
-      keyboardHideListenerCallback,
-    );
-
-    return () => {
-      keyboardHideListener.remove();
-    };
-  }, [keyboardHideListenerCallback]);
-
   const performHaptic = () => {
     Haptics.selectionAsync();
   };
@@ -115,56 +98,36 @@ export const Editor = ({
     onSave(finalMarkdown);
   };
 
+
   useEffect(() => {
-    if (isEditing) {
-      const initialHtml = parseHtml(content);
-      
+    if (!isEditing) return;
+
+
+    if (!hasLoadedRef.current) {
+      const initialHtml = markdownToHtml(content);
       setHtmlContent(initialHtml);
-      
-      setTimeout(() => {
+      hasLoadedRef.current = true;
+
+      requestAnimationFrame(() => {
         editorRef.current?.setContentHTML(initialHtml);
-      }, 100); 
+      });
+      return;
     }
-  }, [content, isEditing]);
 
 
-  const handleExit = () => {
-    performHaptic();
-    onExit();
-  };
+    requestAnimationFrame(() => {
+      editorRef.current?.setContentHTML(htmlContent);
+    });
 
-  const toggleToEdit = () => {
-    performHaptic();
-    setIsEditing(true);
-  };
+  }, [isEditing]);
 
-  const parseHtml = (markdown: string) => {
-      return markdownToHtml(markdown);
-  }
-  
-  const richEditorStyles = {
-    backgroundColor: colors.bg,
-    caretColor: colors.okBtn,
-    color: colors.text,
-    initialCSSText: `
-      ${FontFamilyStylesheet}
-      body, div, p, span, * { 
-        font-family: 'SFProCustom' !important; 
-        color: ${colors.text};
-        font-size: 16px;
-      }
-    `,
-    contentCSSText: `
-      font-family: 'SFProCustom' !important;
-      color: ${colors.text};
-      font-size: 16px;
-    `,
-  };
 
   const placeholderText = content.trim() !== '' ? '' : "Digite aqui...";
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
+
+      {/* HEADER */}
       <View
         style={{
           paddingTop: 20,
@@ -180,57 +143,40 @@ export const Editor = ({
           zIndex: 50,
         }}
       >
-        <TouchableOpacity onPress={handleExit} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+        <TouchableOpacity onPress={onExit}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Feather name="chevron-left" size={25} color={colors.icon} />
-            <Text
-              style={{
-                fontSize: 20,
-                color: colors.text,
-                marginLeft: 4,
-                lineHeight: 22,
-                fontWeight: undefined,
-                fontFamily: 'SF-Pro',
-              }}
-            >
+            <Text style={{ fontSize: 20, color: colors.text, marginLeft: 4 }}>
               Voltar
             </Text>
           </View>
         </TouchableOpacity>
 
         {isEditing ? (
-          <TouchableOpacity onPress={save} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-            <Text
-              style={{
-                fontSize: 18,
-                color: colors.okBtn,
-                fontFamily: 'SF-Pro-Bold',
-              }}
-            >
+          <TouchableOpacity onPress={save}>
+            <Text style={{ fontSize: 18, color: colors.okBtn }}>
               OK
             </Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity onPress={onDelete} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+          <TouchableOpacity onPress={onDelete}>
             <Feather name="trash-2" size={22} color={colors.deleteBtn} />
           </TouchableOpacity>
         )}
       </View>
 
-      <React.Fragment key={keyboardAvoidingViewKey}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : "height"} 
-          keyboardVerticalOffset={0} 
-        >
+      {/* EDITOR OU VISUALIZAÇÃO */}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
+      >
+
         {isEditing ? (
           <ScrollView
             style={{ flex: 1 }}
             keyboardShouldPersistTaps="always"
-            contentContainerStyle={{
-              flexGrow: 1,
-              paddingBottom: 30,
-            }}
+            contentContainerStyle={{ flexGrow: 1, paddingBottom: 30 }}
           >
             <View style={styles.editorPane}>
               <View style={styles.inputsContainer}>
@@ -241,49 +187,48 @@ export const Editor = ({
                   value={title}
                   onChangeText={setTitle}
                 />
+
                 <TextInput
-                  style={styles.inputTitle}           
+                  style={styles.inputTitle}
                   placeholder="#tag"
                   placeholderTextColor={colors.placeholder}
                   value={tag}
                   onChangeText={setTag}
                 />
               </View>
+
               <RichEditor
                 ref={editorRef}
                 editorStyle={dynamicEditorStyle}
                 useContainer={false}
                 placeholder={placeholderText}
-                onChange={setHtmlContent} 
+                initialContentHTML={htmlContent}  
+                onChange={setHtmlContent}
               />
-              </View>
-              <RichToolbar
-                editor={editorRef}  
-                selectedButtonStyle={styles.toolBtn}
-                unselectedButtonStyle={styles.unselectedToolBtn}
-                actions={[
-                  actions.setBold,
-                  actions.setItalic,
-                  actions.setStrikethrough,
-                  actions.insertBulletsList,
-                  actions.insertOrderedList,
-                  actions.removeFormat,
-                  actions.undo,
-                  actions.redo,
-                ]}
-                style={{
-                  backgroundColor: colors.bg
-                }}
-              />
-            </ScrollView>
+            </View>
+
+            <RichToolbar
+              editor={editorRef}
+              selectedButtonStyle={styles.toolBtn}
+              unselectedButtonStyle={styles.unselectedToolBtn}
+              actions={[
+                actions.setBold,
+                actions.setItalic,
+                actions.setStrikethrough,
+                actions.insertBulletsList,
+                actions.removeFormat,
+                actions.undo,
+                actions.redo,
+              ]}
+              style={{ backgroundColor: colors.bg }}
+            />
+
+          </ScrollView>
+
         ) : (
           <View style={{ flex: 1 }}>
             <ScrollView style={styles.previewPane} contentContainerStyle={{ paddingBottom: 40 }}>
-              <TouchableOpacity 
-                activeOpacity={1} 
-                onPress={toggleToEdit} 
-                style={{ minHeight: 200 }}
-              >
+              <TouchableOpacity activeOpacity={1} onPress={() => setIsEditing(true)}>
                 <Text style={styles.previewTitle}>{title}</Text>
 
                 {tag ? (
@@ -292,23 +237,19 @@ export const Editor = ({
                   </View>
                 ) : null}
 
-                {(!content || content.trim() === '') ? (
-                  <Text style={{ 
-                      color: colors.placeholder, 
-                      fontSize: 18, 
-                      marginTop: 10,
-                    }}>
+                {!content.trim() ? (
+                  <Text style={{ color: colors.placeholder, fontSize: 18, marginTop: 10 }}>
                     Pressione para começar a digitar...
                   </Text>
                 ) : (
-                    <Markdown style={markdownStyles}>{content}</Markdown>
+                  <Markdown style={markdownStyles}>{content}</Markdown>
                 )}
               </TouchableOpacity>
             </ScrollView>
           </View>
         )}
-        </KeyboardAvoidingView>
-      </React.Fragment>
+
+      </KeyboardAvoidingView>
     </View>
   );
 };
